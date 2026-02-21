@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bookgpt"
+version = "0.1.0"
+description = "Book-Specialized Micro GPT-2 Models with Orchestration"
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.0",
+    "tokenizers>=0.15",
+    "datasets>=2.16",
+    "requests>=2.31",
+    "beautifulsoup4>=4.12",
+    "pdfplumber>=0.10",
+    "PyMuPDF>=1.23",
+    "tqdm>=4.66",
+    "numpy>=1.26",
+    "scikit-learn>=1.4",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "ipython"]
+
+[tool.setuptools.packages.find]
+include = ["bookgpt*"]

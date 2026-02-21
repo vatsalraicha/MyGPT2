@@ -1,0 +1,99 @@
+# BookGPT Default Configuration
+
+# Data paths
+data:
+  books_dir: "data/books/raw"
+  tokenized_dir: "data/books/tokenized"
+  qa_dir: "data/books/qa"
+  manifest_path: "data/books/manifest.json"
+  tokenizers_dir: "data/tokenizers"
+  pretrained_dir: "data/models/pretrained"
+  finetuned_dir: "data/models/finetuned"
+  router_dir: "data/router"
+  logs_dir: "logs"
+
+# Crawler settings
+crawl:
+  gutenberg:
+    base_url: "https://www.gutenberg.org"
+    math_bookshelf_url: "https://www.gutenberg.org/ebooks/bookshelf/35"
+    max_books: 10
+    delay_seconds: 2
+  openstax:
+    base_url: "https://openstax.org"
+    subjects: ["math"]
+    max_books: 5
+
+# Tokenizer settings
+tokenizer:
+  vocab_size: 8192
+  min_frequency: 2
+  special_tokens:
+    - "<|endoftext|>"
+    - "<|pad|>"
+    - "<|question|>"
+    - "<|answer|>"
+    - "<|context|>"
+
+# Model architecture
+model:
+  n_layer: 6
+  n_head: 8
+  n_embd: 256
+  context_length: 512
+  dropout: 0.1
+  bias: false  # no bias in linear layers (following GPT-2/3 convention)
+
+# Pretraining
+pretrain:
+  batch_size: 32
+  learning_rate: 3.0e-4
+  weight_decay: 0.1
+  betas: [0.9, 0.95]
+  max_epochs: 50
+  warmup_fraction: 0.05
+  grad_clip: 1.0
+  eval_interval: 500
+  save_interval: 1000
+  patience: 5  # early stopping patience (epochs)
+  train_split: 0.9
+  gradient_accumulation_steps: 4
+
+# Fine-tuning
+finetune:
+  batch_size: 16
+  learning_rate: 5.0e-5
+  weight_decay: 0.01
+  max_epochs: 10
+  warmup_fraction: 0.1
+  grad_clip: 1.0
+  patience: 3
+
+# Q&A generation
+qa_generate:
+  chunk_size: 500  # tokens per passage
+  chunk_overlap: 50
+  min_qa_pairs: 500
+  max_qa_pairs: 2000
+
+# Router
+router:
+  method: "tfidf"  # "tfidf" or "sentence_transformer"
+  top_k: 3
+
+# Orchestrator
+orchestrator:
+  merge_strategy: "confidence"  # "confidence", "voting", "concat"
+  max_answer_tokens: 256
+  temperature: 0.7
+  top_k: 50
+
+# Generation
+generate:
+  max_tokens: 256
+  temperature: 0.7
+  top_k: 50
+  top_p: 0.9
+
+# Reproducibility
+seed: 42

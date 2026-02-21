@@ -1,0 +1,12 @@
+data/
+logs/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.venv/
+*.pt
+*.bin
+.claude/
+.DS_Store
