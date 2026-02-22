@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to pretrain GPT-2 models on individual books."""
+"""Script to pretrain GPT-2 models on individual books (shared tokenizer)."""
 
 import argparse
 import json
@@ -35,10 +35,10 @@ def main():
         help="Path to book manifest",
     )
     parser.add_argument(
-        "--tokenizers-dir",
+        "--tokenizer-dir",
         type=str,
-        default="data/tokenizers",
-        help="Base directory for tokenizers",
+        default="data/tokenizers/shared",
+        help="Path to shared tokenizer directory",
     )
     parser.add_argument(
         "--output-dir",
@@ -65,6 +65,13 @@ def main():
     device = get_device(force_cpu=args.force_cpu)
     logger.info(f"Using device: {device}")
 
+    # Verify shared tokenizer exists
+    tokenizer_dir = Path(args.tokenizer_dir)
+    if not (tokenizer_dir / "tokenizer.json").exists():
+        logger.error(f"Shared tokenizer not found at {tokenizer_dir}")
+        logger.error("Run: python scripts/train_tokenizer.py first")
+        return
+
     # Load manifest
     with open(args.manifest) as f:
         manifest = json.load(f)
@@ -78,12 +85,7 @@ def main():
     for entry in manifest:
         book_id = entry["book_id"]
         book_path = entry["file_path"]
-        tokenizer_dir = Path(args.tokenizers_dir) / book_id
         save_dir = Path(args.output_dir) / book_id
-
-        if not tokenizer_dir.exists():
-            logger.warning(f"Tokenizer not found for {book_id}, skipping")
-            continue
 
         logger.info(f"\n{'='*60}")
         logger.info(f"Pretraining: {entry['title']} ({book_id})")

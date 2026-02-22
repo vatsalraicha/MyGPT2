@@ -23,7 +23,7 @@ class Orchestrator:
         manifest_path: str | Path,
         router_dir: str | Path,
         models_dir: str | Path,
-        tokenizers_dir: str | Path,
+        tokenizer_dir: str | Path,
         device: torch.device | None = None,
         merge_strategy: str = "confidence",
         use_finetuned: bool = True,
@@ -33,7 +33,7 @@ class Orchestrator:
             manifest_path: Path to books manifest.json.
             router_dir: Path to saved router artifacts.
             models_dir: Base path containing pretrained/ or finetuned/ subdirs.
-            tokenizers_dir: Base path containing per-book tokenizer directories.
+            tokenizer_dir: Path to shared tokenizer directory.
             device: Device to run inference on.
             merge_strategy: How to combine answers ("confidence", "voting", "concat").
             use_finetuned: Whether to use fine-tuned models (True) or pretrained (False).
@@ -42,22 +42,25 @@ class Orchestrator:
         self.merge_strategy = merge_strategy
         self.manifest_path = Path(manifest_path)
         self.models_dir = Path(models_dir)
-        self.tokenizers_dir = Path(tokenizers_dir)
         self.use_finetuned = use_finetuned
 
         # Load router
         logger.info("Loading router...")
         self.router = BookRouter.load(router_dir)
 
+        # Load shared tokenizer (same for all models)
+        logger.info("Loading shared tokenizer...")
+        self.tokenizer = load_tokenizer(tokenizer_dir)
+
         # Load manifest
         with open(manifest_path) as f:
             self.manifest = {entry["book_id"]: entry for entry in json.load(f)}
 
         # Cache for loaded models (lazy loading)
-        self._model_cache: dict[str, tuple[GPT2, object]] = {}
+        self._model_cache: dict[str, GPT2] = {}
 
-    def _load_model(self, book_id: str) -> tuple[GPT2, object]:
-        """Load a model and tokenizer for a book (with caching)."""
+    def _load_model(self, book_id: str) -> GPT2:
+        """Load a model for a book (with caching). Tokenizer is shared."""
         if book_id in self._model_cache:
             return self._model_cache[book_id]
 
@@ -82,13 +85,10 @@ class Orchestrator:
         model = GPT2.from_pretrained(model_dir, device=self.device)
         model.eval()
 
-        tokenizer_dir = self.tokenizers_dir / book_id
-        tokenizer = load_tokenizer(tokenizer_dir)
-
-        self._model_cache[book_id] = (model, tokenizer)
+        self._model_cache[book_id] = model
         logger.info(f"Loaded model for {book_id} from {model_dir}")
 
-        return model, tokenizer
+        return model
 
     def _unload_model(self, book_id: str):
         """Unload a model from cache to free memory."""
@@ -129,13 +129,13 @@ class Orchestrator:
         for route_info in routes:
             book_id = route_info["book_id"]
             try:
-                model, tokenizer = self._load_model(book_id)
+                model = self._load_model(book_id)
 
                 if self.use_finetuned:
                     # Use Q&A format
                     answer_text, log_prob = generate_answer(
                         model=model,
-                        tokenizer=tokenizer,
+                        tokenizer=self.tokenizer,
                         context="",  # No specific context; the model has book knowledge
                         question=question,
                         max_new_tokens=max_answer_tokens,
@@ -146,7 +146,7 @@ class Orchestrator:
                     # Use prompt completion
                     answer_text = generate_text(
                         model=model,
-                        tokenizer=tokenizer,
+                        tokenizer=self.tokenizer,
                         prompt=question,
                         max_new_tokens=max_answer_tokens,
                         temperature=temperature,

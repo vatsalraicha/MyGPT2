@@ -54,7 +54,7 @@ def main():
     parser.add_argument("--manifest", type=str, default="data/books/manifest.json")
     parser.add_argument("--router-dir", type=str, default="data/router")
     parser.add_argument("--models-dir", type=str, default="data/models")
-    parser.add_argument("--tokenizers-dir", type=str, default="data/tokenizers")
+    parser.add_argument("--tokenizer-dir", type=str, default="data/tokenizers/shared")
     parser.add_argument("--no-finetuned", action="store_true", help="Use pretrained models only")
     parser.add_argument("--top-k", type=int, default=3, help="Number of models to consult")
     parser.add_argument("--temperature", type=float, default=0.7)
@@ -86,7 +86,7 @@ def main():
         manifest_path=args.manifest,
         router_dir=args.router_dir,
         models_dir=args.models_dir,
-        tokenizers_dir=args.tokenizers_dir,
+        tokenizer_dir=args.tokenizer_dir,
         device=device,
         merge_strategy=args.strategy,
         use_finetuned=not args.no_finetuned,

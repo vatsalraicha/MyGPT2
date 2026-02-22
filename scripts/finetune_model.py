@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to generate Q&A data and fine-tune models for each book."""
+"""Script to generate Q&A data and fine-tune models for each book (shared tokenizer)."""
 
 import argparse
 import json
@@ -35,10 +35,10 @@ def main():
         help="Path to book manifest",
     )
     parser.add_argument(
-        "--tokenizers-dir",
+        "--tokenizer-dir",
         type=str,
-        default="data/tokenizers",
-        help="Base directory for tokenizers",
+        default="data/tokenizers/shared",
+        help="Path to shared tokenizer directory",
     )
     parser.add_argument(
         "--pretrained-dir",
@@ -78,6 +78,13 @@ def main():
     device = get_device(force_cpu=args.force_cpu)
     logger.info(f"Using device: {device}")
 
+    # Verify shared tokenizer exists
+    tokenizer_dir = Path(args.tokenizer_dir)
+    if not (tokenizer_dir / "tokenizer.json").exists():
+        logger.error(f"Shared tokenizer not found at {tokenizer_dir}")
+        logger.error("Run: python scripts/train_tokenizer.py first")
+        return
+
     # Load manifest
     with open(args.manifest) as f:
         manifest = json.load(f)
@@ -94,14 +101,9 @@ def main():
     for entry in manifest:
         book_id = entry["book_id"]
         book_path = entry["file_path"]
-        tokenizer_dir = Path(args.tokenizers_dir) / book_id
         pretrained_dir = Path(args.pretrained_dir) / book_id
         finetuned_dir = Path(args.finetuned_dir) / book_id
         qa_path = Path(args.qa_dir) / f"{book_id}.jsonl"
-
-        if not tokenizer_dir.exists():
-            logger.warning(f"Tokenizer not found for {book_id}, skipping")
-            continue
 
         if not pretrained_dir.exists():
             logger.warning(f"Pretrained model not found for {book_id}, skipping")

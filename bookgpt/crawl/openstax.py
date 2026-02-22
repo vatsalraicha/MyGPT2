@@ -1,20 +1,25 @@
-"""Crawler for OpenStax free textbooks."""
+"""Crawler for OpenStax free textbooks.
 
-import json
+OpenStax textbooks are free under CC license. Since their website is
+JavaScript-rendered (scraping HTML yields empty content), we download
+the official PDF versions and extract text using pdfplumber/PyMuPDF.
+"""
+
 import logging
 import re
+import tempfile
 import time
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup
 
 from bookgpt.crawl.pdf_extract import extract_text_from_pdf
 
 logger = logging.getLogger(__name__)
 
-# Known OpenStax math textbook URLs (freely available with CC license)
-# These are the web-view URLs; we'll scrape the HTML content directly
+# OpenStax math textbooks with their known PDF download URLs.
+# These are the official free PDFs provided by OpenStax under CC BY license.
+# PDF URLs are fetched via the OpenStax CMS API.
 OPENSTAX_BOOKS = [
     {
         "slug": "algebra-and-trigonometry-2e",
@@ -43,7 +48,6 @@ OPENSTAX_BOOKS = [
     },
 ]
 
-OPENSTAX_API = "https://openstax.org/apps/archive"
 OPENSTAX_BASE = "https://openstax.org"
 
 
@@ -52,10 +56,7 @@ def crawl_openstax(
     max_books: int = 5,
     delay_seconds: float = 2.0,
 ) -> list[dict]:
-    """Download math textbooks from OpenStax.
-
-    Scrapes the HTML content directly from the OpenStax web reader,
-    which provides well-structured content.
+    """Download math textbooks from OpenStax by fetching their free PDFs.
 
     Args:
         output_dir: Directory to save cleaned text files.
@@ -76,7 +77,7 @@ def crawl_openstax(
             meta = _download_openstax_book(book_info, output_dir, delay_seconds)
             if meta:
                 results.append(meta)
-                logger.info(f"Downloaded: {meta['title']} ({meta['token_count']} chars)")
+                logger.info(f"Downloaded: {meta['title']} ({meta['token_count']:,} chars)")
         except Exception as e:
             logger.error(f"Failed to download {book_info['title']}: {e}")
 
@@ -89,117 +90,172 @@ def crawl_openstax(
 def _download_openstax_book(
     book_info: dict, output_dir: Path, delay: float
 ) -> dict | None:
-    """Download a single OpenStax book by scraping its table of contents and chapters."""
+    """Download a single OpenStax book PDF and extract text."""
     slug = book_info["slug"]
-    toc_url = f"{OPENSTAX_BASE}/details/books/{slug}"
+    title = book_info["title"]
+
+    logger.info(f"Fetching PDF URL for {title}...")
+
+    # Step 1: Get the PDF download URL from the OpenStax CMS API
+    pdf_url = _get_pdf_url(slug, delay)
+
+    if not pdf_url:
+        logger.warning(f"Could not find PDF URL for {slug}")
+        return None
+
+    logger.info(f"Downloading PDF for {title} from {pdf_url}...")
+
+    # Step 2: Download the PDF
+    try:
+        resp = requests.get(
+            pdf_url,
+            timeout=120,  # PDFs can be large
+            allow_redirects=True,
+            headers={"User-Agent": "BookGPT/1.0 (educational research project)"},
+        )
+        if resp.status_code != 200:
+            logger.warning(f"PDF download failed for {slug}: HTTP {resp.status_code}")
+            return None
+
+        if len(resp.content) < 10000:
+            logger.warning(f"PDF too small for {slug} ({len(resp.content)} bytes)")
+            return None
+
+    except requests.RequestException as e:
+        logger.warning(f"PDF download error for {slug}: {e}")
+        return None
+
+    # Step 3: Save PDF temporarily and extract text
+    pdf_mb = len(resp.content) / 1024 / 1024
+    logger.info(f"Extracting text from {title} PDF ({pdf_mb:.1f} MB)...")
+
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+        tmp.write(resp.content)
+        tmp_path = tmp.name
 
     try:
-        resp = requests.get(toc_url, timeout=30)
-        resp.raise_for_status()
-    except requests.RequestException as e:
-        logger.warning(f"Could not fetch TOC for {slug}: {e}")
+        text = extract_text_from_pdf(tmp_path)
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+
+    if not text or len(text) < 1000:
+        logger.warning(f"Text extraction yielded too little for {slug}")
         return None
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+    # Step 4: Clean the text
+    text = _clean_openstax_text(text)
 
-    # Try to find chapter links in the book details page
-    chapter_links = _extract_chapter_links(soup, slug)
-
-    if not chapter_links:
-        logger.warning(f"No chapter links found for {slug}, trying direct content scrape")
-        # Fallback: try the book's content page directly
-        chapter_links = [f"/books/{slug}"]
-
-    # Scrape each chapter
-    all_text = []
-    for link in chapter_links:
-        time.sleep(delay)
-        chapter_text = _scrape_chapter(link)
-        if chapter_text:
-            all_text.append(chapter_text)
-
-    if not all_text:
-        logger.warning(f"No content extracted for {slug}")
-        return None
-
-    full_text = "\n\n".join(all_text)
-    full_text = _clean_openstax_text(full_text)
-
-    if len(full_text) < 1000:
-        logger.warning(f"Book {slug} too short ({len(full_text)} chars), skipping")
-        return None
-
-    file_path = output_dir / f"openstax_{slug.replace('-', '_')}.txt"
-    file_path.write_text(full_text, encoding="utf-8")
+    # Step 5: Save
+    book_id = f"openstax_{slug.replace('-', '_')}"
+    file_path = output_dir / f"{book_id}.txt"
+    file_path.write_text(text, encoding="utf-8")
 
     return {
-        "book_id": f"openstax_{slug.replace('-', '_')}",
-        "title": book_info["title"],
+        "book_id": book_id,
+        "title": title,
         "source": "openstax",
         "source_url": f"{OPENSTAX_BASE}/details/books/{slug}",
         "subject": book_info["subject"],
-        "token_count": len(full_text),
+        "token_count": len(text),
         "file_path": str(file_path),
     }
 
 
-def _extract_chapter_links(soup: BeautifulSoup, slug: str) -> list[str]:
-    """Extract chapter/section links from the book details page."""
-    links = []
-    # Look for links containing the book slug that point to chapter content
-    for a_tag in soup.find_all("a", href=True):
-        href = a_tag["href"]
-        if f"/books/{slug}/" in href and href not in links:
-            links.append(href)
+def _get_pdf_url(slug: str, delay: float) -> str | None:
+    """Get the PDF download URL for an OpenStax book using their CMS API."""
 
-    # Deduplicate and limit
-    seen = set()
-    unique = []
-    for link in links:
-        # Normalize the link
-        if link.startswith("/"):
-            link = f"{OPENSTAX_BASE}{link}"
-        if link not in seen:
-            seen.add(link)
-            unique.append(link)
-
-    return unique[:50]  # cap at 50 chapters
-
-
-def _scrape_chapter(url: str) -> str | None:
-    """Scrape text content from a single chapter URL."""
-    if url.startswith("/"):
-        url = f"{OPENSTAX_BASE}{url}"
+    # Approach 1: Use the OpenStax CMS API to find the book and its PDF link
+    api_url = (
+        f"{OPENSTAX_BASE}/apps/cms/api/v2/pages/"
+        f"?type=books.Book&fields=*&slug={slug}"
+    )
 
     try:
-        resp = requests.get(url, timeout=30)
-        if resp.status_code != 200:
-            return None
-    except requests.RequestException:
-        return None
+        resp = requests.get(api_url, timeout=15)
+        if resp.status_code == 200:
+            data = resp.json()
+            items = data.get("items", [])
+            if items:
+                book_data = items[0]
 
-    soup = BeautifulSoup(resp.text, "html.parser")
+                # Check for direct PDF URL fields
+                for field in [
+                    "high_resolution_pdf_url",
+                    "low_resolution_pdf_url",
+                ]:
+                    url = book_data.get(field)
+                    if url:
+                        logger.debug(f"  Found PDF via API field '{field}': {url}")
+                        return url
 
-    # Remove script/style elements
-    for tag in soup(["script", "style", "nav", "header", "footer"]):
-        tag.decompose()
+                # If not in the listing, fetch the full page detail
+                page_id = book_data.get("id")
+                if page_id:
+                    time.sleep(delay)
+                    detail_resp = requests.get(
+                        f"{OPENSTAX_BASE}/apps/cms/api/v2/pages/{page_id}/",
+                        timeout=15,
+                    )
+                    if detail_resp.status_code == 200:
+                        detail = detail_resp.json()
 
-    # Look for main content area
-    content = soup.find("main") or soup.find("div", class_=re.compile(r"content|chapter|book"))
-    if content is None:
-        content = soup.body
+                        for field in [
+                            "high_resolution_pdf_url",
+                            "low_resolution_pdf_url",
+                        ]:
+                            url = detail.get(field)
+                            if url:
+                                logger.debug(f"  Found PDF via detail field '{field}': {url}")
+                                return url
 
-    if content is None:
-        return None
+                        # Check nested resource lists
+                        for res_field in ["book_faculty_resources", "book_student_resources"]:
+                            resources = detail.get(res_field, [])
+                            if isinstance(resources, list):
+                                for res in resources:
+                                    link = (
+                                        res.get("link_document_url")
+                                        or res.get("link_external")
+                                        or ""
+                                    )
+                                    if ".pdf" in link.lower():
+                                        logger.debug(f"  Found PDF in resources: {link}")
+                                        return link
 
-    return content.get_text(separator="\n", strip=True)
+    except Exception as e:
+        logger.debug(f"API query failed: {e}")
+
+    # Approach 2: Try common direct URL patterns
+    time.sleep(delay)
+    direct_patterns = [
+        f"https://assets.openstax.org/oscms-prodcms/media/documents/{slug}.pdf",
+        f"https://d3bxy9euw4e147.cloudfront.net/oscms-prodcms/media/documents/{slug}.pdf",
+    ]
+
+    for url in direct_patterns:
+        try:
+            resp = requests.head(url, timeout=10, allow_redirects=True)
+            if resp.status_code == 200:
+                logger.debug(f"  Found PDF via direct URL: {url}")
+                return url
+        except requests.RequestException:
+            pass
+
+    return None
 
 
 def _clean_openstax_text(text: str) -> str:
-    """Clean OpenStax scraped text."""
-    # Remove navigation artifacts
-    text = re.sub(r"Previous\s+Next", "", text)
-    text = re.sub(r"Skip to Content", "", text)
+    """Clean OpenStax PDF-extracted text."""
+    # Remove common PDF artifacts
+    text = re.sub(r"Access for free at.*?openstax\.org[^\n]*", "", text)
+    text = re.sub(r"OpenStax.*?Creative Commons.*?\n", "", text)
+
+    # Remove page headers/footers that repeat
+    text = re.sub(r"(?m)^\d+\s*\|\s*Chapter\s+\d+.*$", "", text)
+    text = re.sub(r"(?m)^\d+\s*\|\s*Index.*$", "", text)
+
+    # Remove standalone page numbers
+    text = re.sub(r"\n\s*\d+\s*\n", "\n", text)
 
     # Normalize whitespace
     text = re.sub(r"\n{3,}", "\n\n", text)

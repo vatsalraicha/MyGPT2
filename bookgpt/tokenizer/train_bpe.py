@@ -1,4 +1,7 @@
-"""BPE tokenizer training per book using HuggingFace tokenizers."""
+"""BPE tokenizer training using HuggingFace tokenizers.
+
+Supports training a shared tokenizer on all books combined.
+"""
 
 import json
 import logging
@@ -18,16 +21,17 @@ SPECIAL_TOKENS = [
 
 
 def train_bpe_tokenizer(
-    text_path: str | Path,
+    text_paths: str | Path | list[str | Path],
     output_dir: str | Path,
     vocab_size: int = 8192,
     min_frequency: int = 2,
     special_tokens: list[str] | None = None,
 ) -> Tokenizer:
-    """Train a byte-level BPE tokenizer on a single book.
+    """Train a byte-level BPE tokenizer on one or more text files.
 
     Args:
-        text_path: Path to the cleaned book text file.
+        text_paths: Path(s) to cleaned book text file(s). Can be a single path
+                    or a list of paths for shared training across all books.
         output_dir: Directory to save the tokenizer.
         vocab_size: Target vocabulary size.
         min_frequency: Minimum frequency for a token to be included.
@@ -36,14 +40,22 @@ def train_bpe_tokenizer(
     Returns:
         The trained Tokenizer.
     """
-    text_path = Path(text_path)
+    # Normalize to list of paths
+    if isinstance(text_paths, (str, Path)):
+        text_paths = [text_paths]
+    text_paths = [Path(p) for p in text_paths]
+
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if special_tokens is None:
         special_tokens = SPECIAL_TOKENS
 
-    logger.info(f"Training BPE tokenizer on {text_path.name} (vocab_size={vocab_size})")
+    file_names = [p.name for p in text_paths]
+    logger.info(
+        f"Training BPE tokenizer on {len(text_paths)} file(s) "
+        f"(vocab_size={vocab_size}): {file_names[:5]}{'...' if len(file_names) > 5 else ''}"
+    )
 
     # Build tokenizer with byte-level BPE
     tokenizer = Tokenizer(models.BPE())
@@ -61,7 +73,7 @@ def train_bpe_tokenizer(
         show_progress=True,
     )
 
-    tokenizer.train([str(text_path)], trainer=trainer)
+    tokenizer.train([str(p) for p in text_paths], trainer=trainer)
 
     # Enable padding
     pad_id = tokenizer.token_to_id("<|pad|>")
@@ -74,7 +86,8 @@ def train_bpe_tokenizer(
     # Save metadata
     meta = {
         "vocab_size": tokenizer.get_vocab_size(),
-        "source_file": str(text_path),
+        "source_files": [str(p) for p in text_paths],
+        "num_source_files": len(text_paths),
         "special_tokens": {tok: tokenizer.token_to_id(tok) for tok in special_tokens},
     }
     (output_dir / "meta.json").write_text(json.dumps(meta, indent=2))
@@ -82,6 +95,7 @@ def train_bpe_tokenizer(
     logger.info(
         f"Tokenizer saved to {output_dir} "
         f"(vocab_size={tokenizer.get_vocab_size()}, "
+        f"trained on {len(text_paths)} files, "
         f"special_tokens={meta['special_tokens']})"
     )
 
