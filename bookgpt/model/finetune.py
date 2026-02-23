@@ -115,6 +115,7 @@ def finetune_book(
         config=config,
         save_dir=save_dir,
         device=device,
+        stage="finetune",
     )
 
     stats = trainer.train()

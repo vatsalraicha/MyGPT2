@@ -189,6 +189,77 @@ class Orchestrator:
             "all_answers": answers,
         }
 
+    def query_book(
+        self,
+        book_id: str,
+        question: str,
+        max_answer_tokens: int = 256,
+        temperature: float = 0.7,
+        verbose: bool = True,
+    ) -> dict:
+        """Query a specific book model directly (bypass router).
+
+        Args:
+            book_id: The book model to query.
+            question: The user's question.
+            max_answer_tokens: Maximum tokens per answer.
+            temperature: Sampling temperature.
+            verbose: Whether to print intermediate results.
+
+        Returns:
+            Dict with 'answer', 'sources', 'all_answers'.
+        """
+        if verbose:
+            title = self.manifest.get(book_id, {}).get("title", book_id)
+            print(f"\n[Direct] Querying: {title} ({book_id})")
+
+        try:
+            model = self._load_model(book_id)
+
+            if self.use_finetuned:
+                answer_text, log_prob = generate_answer(
+                    model=model,
+                    tokenizer=self.tokenizer,
+                    context="",
+                    question=question,
+                    max_new_tokens=max_answer_tokens,
+                    temperature=temperature,
+                    device=self.device,
+                )
+            else:
+                answer_text = generate_text(
+                    model=model,
+                    tokenizer=self.tokenizer,
+                    prompt=question,
+                    max_new_tokens=max_answer_tokens,
+                    temperature=temperature,
+                    device=self.device,
+                )
+                log_prob = 0.0
+
+            if verbose:
+                print(f"\n[{book_id}] {answer_text[:300]}")
+
+            return {
+                "answer": answer_text,
+                "sources": [{"book_id": book_id, "title": self.manifest.get(book_id, {}).get("title", book_id)}],
+                "all_answers": [{
+                    "book_id": book_id,
+                    "answer": answer_text,
+                    "confidence": log_prob,
+                }],
+            }
+
+        except Exception as e:
+            error_msg = f"Error querying {book_id}: {e}"
+            if verbose:
+                print(f"\n{error_msg}")
+            return {
+                "answer": error_msg,
+                "sources": [],
+                "all_answers": [],
+            }
+
     def _merge_answers(self, answers: list[dict]) -> str:
         """Merge answers from multiple models into a single response."""
         if len(answers) == 1:

@@ -26,6 +26,7 @@ class Trainer:
         config: dict,
         save_dir: str | Path,
         device: torch.device | None = None,
+        stage: str = "pretrain",
     ):
         self.model = model
         self.train_dataset = train_dataset
@@ -34,6 +35,8 @@ class Trainer:
         self.save_dir = Path(save_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
         self.device = device or get_device()
+        self.stage = stage
+        self.log = logging.getLogger(f"bookgpt.trainer.{stage}")
 
         self.model.to(self.device)
 
@@ -122,20 +125,34 @@ class Trainer:
         max_epochs = self.config.get("max_epochs", 50)
         grad_clip = self.config.get("grad_clip", 1.0)
         patience = self.config.get("patience", 5)
+        min_delta = self.config.get("min_delta", 0.0)  # Minimum improvement to count as progress
         eval_interval = self.config.get("eval_interval", 500)
         save_interval = self.config.get("save_interval", 1000)
         grad_accum_steps = self.config.get("gradient_accumulation_steps", 1)
 
+        # Adapt batch size for small datasets so we don't get 0 batches
+        n_train = len(self.train_dataset)
+        if n_train == 0:
+            self.log.warning("Training dataset is empty — skipping training")
+            self._save_checkpoint("final")
+            return {"total_steps": 0, "total_epochs": 0, "best_val_loss": float("inf"),
+                    "best_val_ppl": float("inf"), "total_time_seconds": 0.0, "skipped": True}
+
+        effective_batch = min(batch_size, n_train)
+        # Also reduce grad_accum if dataset is tiny
+        if n_train < batch_size * grad_accum_steps:
+            grad_accum_steps = max(1, n_train // effective_batch)
+
         train_loader = DataLoader(
             self.train_dataset,
-            batch_size=batch_size,
+            batch_size=effective_batch,
             shuffle=True,
-            drop_last=True,
+            drop_last=len(self.train_dataset) > effective_batch,  # Only drop last if we have enough samples
             num_workers=0,  # MPS doesn't benefit from multiprocess loading
         )
         val_loader = DataLoader(
             self.val_dataset,
-            batch_size=batch_size,
+            batch_size=min(batch_size, max(1, len(self.val_dataset))),
             shuffle=False,
             drop_last=False,
             num_workers=0,
@@ -145,7 +162,7 @@ class Trainer:
         total_steps = steps_per_epoch * max_epochs
         effective_batch_size = batch_size * grad_accum_steps
 
-        logger.info(
+        self.log.info(
             f"Training config: {max_epochs} epochs, {steps_per_epoch} steps/epoch, "
             f"batch_size={batch_size}, grad_accum={grad_accum_steps}, "
             f"effective_batch={effective_batch_size}"
@@ -191,7 +208,7 @@ class Trainer:
                     avg_loss = epoch_loss / n_batches
                     ppl = math.exp(min(avg_loss, 20))
                     elapsed = time.time() - start_time
-                    logger.info(
+                    self.log.info(
                         f"Step {self.global_step} | Epoch {epoch+1}/{max_epochs} | "
                         f"Loss: {avg_loss:.4f} | PPL: {ppl:.2f} | LR: {lr:.2e} | "
                         f"Time: {elapsed:.0f}s"
@@ -201,7 +218,7 @@ class Trainer:
                 if self.global_step % eval_interval == 0 and len(val_loader) > 0:
                     val_loss = self.evaluate(val_loader)
                     val_ppl = math.exp(min(val_loss, 20))
-                    logger.info(f"  Val Loss: {val_loss:.4f} | Val PPL: {val_ppl:.2f}")
+                    self.log.info(f"  Val Loss: {val_loss:.4f} | Val PPL: {val_ppl:.2f}")
                     self.val_losses.append({"step": self.global_step, "loss": val_loss})
 
                 # Periodic save
@@ -216,22 +233,29 @@ class Trainer:
             val_ppl = math.exp(min(val_loss, 20))
             train_ppl = math.exp(min(avg_epoch_loss, 20))
 
-            logger.info(
+            self.log.info(
                 f"Epoch {epoch+1}/{max_epochs} complete | "
                 f"Train Loss: {avg_epoch_loss:.4f} (PPL: {train_ppl:.2f}) | "
                 f"Val Loss: {val_loss:.4f} (PPL: {val_ppl:.2f})"
             )
 
-            # Best model tracking
-            if val_loss < self.best_val_loss:
+            # Best model tracking (with min_delta threshold)
+            if val_loss < self.best_val_loss - min_delta:
+                improvement = self.best_val_loss - val_loss
                 self.best_val_loss = val_loss
                 self.patience_counter = 0
                 self._save_checkpoint("best")
-                logger.info(f"  New best model (val_loss={val_loss:.4f})")
+                self.log.info(f"  New best model (val_loss={val_loss:.4f}, improved by {improvement:.4f})")
             else:
                 self.patience_counter += 1
-                if self.patience_counter >= patience:
-                    logger.info(f"Early stopping after {epoch+1} epochs (patience={patience})")
+                gap = val_loss - self.best_val_loss
+                self.log.info(
+                    f"  No improvement (val={val_loss:.4f}, best={self.best_val_loss:.4f}, "
+                    f"gap={gap:+.4f}, patience={self.patience_counter}/{patience if patience > 0 else 'disabled'})"
+                )
+                # Early stopping only if patience > 0 (0 = disabled, run all epochs)
+                if patience > 0 and self.patience_counter >= patience:
+                    self.log.info(f"Early stopping after {epoch+1} epochs (patience={patience}, min_delta={min_delta})")
                     break
 
             # Clean up MPS memory
@@ -249,14 +273,14 @@ class Trainer:
             "best_val_ppl": math.exp(min(self.best_val_loss, 20)),
             "total_time_seconds": total_time,
         }
-        logger.info(f"Training complete: {stats}")
+        self.log.info(f"Training complete: {stats}")
         return stats
 
     def _save_checkpoint(self, name: str):
         """Save model checkpoint."""
         ckpt_dir = self.save_dir / name
         self.model.save_pretrained(ckpt_dir)
-        logger.info(f"Checkpoint saved: {ckpt_dir}")
+        self.log.info(f"Checkpoint saved: {ckpt_dir}")
 
     def _save_training_log(self):
         """Save training loss curves."""

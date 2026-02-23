@@ -31,14 +31,14 @@ logger = logging.getLogger(__name__)
 BANNER = r"""
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
-║   📚  BookGPT  —  Book-Specialized Micro GPT-2 Models   ║
+║   📚 BookGPT  —  Book-Specialized Micro GPT-2 Models     ║
 ║                                                          ║
 ║   Ask questions about math, and specialized book models  ║
 ║   will collaborate to answer.                            ║
 ║                                                          ║
 ║   Commands:                                              ║
 ║     /quit or /exit  — exit the chat                      ║
-║     /books          — list available books                ║
+║     /books          — list available books               ║
 ║     /strategy <s>   — change merge strategy              ║
 ║     /topk <n>       — change number of models consulted  ║
 ║     /verbose        — toggle verbose mode                ║
@@ -52,20 +52,34 @@ def main():
     parser = argparse.ArgumentParser(description="BookGPT Interactive Chat")
     parser.add_argument("--config", type=str, default="configs/default.yaml")
     parser.add_argument("--manifest", type=str, default="data/books/manifest.json")
-    parser.add_argument("--router-dir", type=str, default="data/router")
-    parser.add_argument("--models-dir", type=str, default="data/models")
+    parser.add_argument("--router-dir", type=str, default=None)
+    parser.add_argument("--models-dir", type=str, default=None)
     parser.add_argument("--tokenizer-dir", type=str, default="data/tokenizers/shared")
     parser.add_argument("--no-finetuned", action="store_true", help="Use pretrained models only")
+    parser.add_argument("--book-id", type=str, default=None,
+                        help="Force a specific book model (skip router)")
     parser.add_argument("--top-k", type=int, default=3, help="Number of models to consult")
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--strategy", type=str, default="confidence",
                         choices=["confidence", "voting", "concat"])
     parser.add_argument("--force-cpu", action="store_true")
+    parser.add_argument("--version", type=str, default=None,
+                        help="Run version (e.g., v1, v2)")
     args = parser.parse_args()
 
-    # Load config
+    # Load config and resolve versioned paths
     with open(args.config) as f:
         config = yaml.safe_load(f)
+
+    from bookgpt.utils.paths import versioned_paths
+    paths = versioned_paths(config, args.version)
+
+    if args.router_dir is None:
+        args.router_dir = paths["router_dir"]
+    if args.models_dir is None:
+        # models_dir is the parent containing pretrained/ and finetuned/ subdirs.
+        # Use the resolved finetuned_dir's parent (handles both legacy and versioned layouts).
+        args.models_dir = str(Path(paths["finetuned_dir"]).parent)
 
     set_seed(config.get("seed", 42))
     device = get_device(force_cpu=args.force_cpu)
@@ -81,7 +95,7 @@ def main():
             sys.exit(1)
 
     # Initialize orchestrator
-    print("Loading models... (this may take a moment)")
+    print(f"Loading models (version: {paths['version']})...")
     orchestrator = Orchestrator(
         manifest_path=args.manifest,
         router_dir=args.router_dir,
@@ -96,11 +110,15 @@ def main():
     top_k = args.top_k
     temperature = args.temperature
     verbose = True
+    forced_book = args.book_id
 
     print(BANNER)
     print(f"Device: {device} | Strategy: {args.strategy} | Top-K: {top_k}")
     print(f"Models: {'fine-tuned' if not args.no_finetuned else 'pretrained'}")
-    print(f"Books indexed: {len(orchestrator.router.book_ids)}")
+    if forced_book:
+        print(f"Forced book: {forced_book}")
+    else:
+        print(f"Books indexed: {len(orchestrator.router.book_ids)}")
     print()
 
     while True:
@@ -155,19 +173,37 @@ def main():
                 verbose = not verbose
                 print(f"Verbose mode: {'on' if verbose else 'off'}")
 
+            elif cmd_name == "/book":
+                if len(cmd) > 1:
+                    forced_book = cmd[1]
+                    print(f"Forced book: {forced_book}")
+                else:
+                    forced_book = None
+                    print("Book filter cleared — using router")
+
             else:
                 print(f"Unknown command: {cmd_name}. Type /help for commands.")
 
             continue
 
         # Process query
-        result = orchestrator.query(
-            question=user_input,
-            top_k=top_k,
-            max_answer_tokens=config.get("generate", {}).get("max_tokens", 256),
-            temperature=temperature,
-            verbose=verbose,
-        )
+        if forced_book:
+            # Bypass router — query a specific book model directly
+            result = orchestrator.query_book(
+                book_id=forced_book,
+                question=user_input,
+                max_answer_tokens=config.get("generate", {}).get("max_tokens", 256),
+                temperature=temperature,
+                verbose=verbose,
+            )
+        else:
+            result = orchestrator.query(
+                question=user_input,
+                top_k=top_k,
+                max_answer_tokens=config.get("generate", {}).get("max_tokens", 256),
+                temperature=temperature,
+                verbose=verbose,
+            )
 
         if not verbose:
             # In non-verbose mode, just show the final answer

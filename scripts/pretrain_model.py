@@ -14,16 +14,48 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from bookgpt.model.pretrain import pretrain_book
 from bookgpt.model.generate import sample_from_model
 from bookgpt.utils.device import get_device
+from bookgpt.utils.paths import versioned_paths, add_version_arg, ensure_dirs
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("logs/pretrain.log"),
-    ],
-)
+# Logging setup deferred to main() so version-aware log path can be used
 logger = logging.getLogger(__name__)
+
+
+def _extract_prompts(book_path: str, n: int = 3) -> list[str]:
+    """Extract real sentence openings from a book to use as generation prompts."""
+    import re
+
+    text = Path(book_path).read_text(encoding="utf-8")
+
+    # Find clean sentences (no TeX noise, reasonable length)
+    sentences = re.split(r"(?<=[.!?])\s+", text)
+    candidates = []
+    for s in sentences:
+        s = s.strip()
+        # Skip short, TeX-heavy, or noisy sentences
+        if len(s) < 30 or len(s) > 200:
+            continue
+        if s.count("$") > 3 or s.count("\\") > 2:
+            continue
+        if not s[0].isupper():
+            continue
+        # Take first 5-8 words as prompt
+        words = s.split()
+        if len(words) >= 5:
+            prompt = " ".join(words[:6])
+            candidates.append(prompt)
+
+    if not candidates:
+        # Fallback: just grab some text chunks
+        for i in range(0, min(len(text), 5000), 1500):
+            chunk = text[i:i+60].strip().split("\n")[0]
+            if len(chunk) > 10:
+                candidates.append(chunk[:40])
+
+    # Pick evenly spaced prompts from the book
+    if len(candidates) <= n:
+        return candidates or ["The", "In this", "We have"]
+    step = len(candidates) // n
+    return [candidates[i * step] for i in range(n)]
 
 
 def main():
@@ -43,8 +75,8 @@ def main():
     parser.add_argument(
         "--output-dir",
         type=str,
-        default="data/models/pretrained",
-        help="Base directory for model output",
+        default=None,
+        help="Base directory for model output (default: version-aware path)",
     )
     parser.add_argument(
         "--config",
@@ -52,15 +84,33 @@ def main():
         default="configs/default.yaml",
         help="Path to config file",
     )
+    add_version_arg(parser)
     parser.add_argument("--book-id", type=str, default=None, help="Train specific book only")
+    parser.add_argument("--min-chars", type=int, default=5000, help="Minimum chars to train (skip smaller)")
     parser.add_argument("--force-cpu", action="store_true", help="Force CPU training")
     args = parser.parse_args()
 
-    Path("logs").mkdir(parents=True, exist_ok=True)
-
-    # Load config
+    # Load config and resolve versioned paths
     with open(args.config) as f:
         config = yaml.safe_load(f)
+
+    paths = versioned_paths(config, args.version)
+    ensure_dirs(paths)
+
+    # Override output-dir if not explicitly set
+    if args.output_dir is None:
+        args.output_dir = paths["pretrained_dir"]
+
+    # Setup logging with versioned log path
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler(f"{paths['logs_dir']}/pretrain.log"),
+        ],
+    )
+    logger.info(f"Run version: {paths['version']}")
 
     device = get_device(force_cpu=args.force_cpu)
     logger.info(f"Using device: {device}")
@@ -82,13 +132,29 @@ def main():
             logger.error(f"Book ID '{args.book_id}' not found in manifest")
             return
 
-    for entry in manifest:
+    skipped = []
+    trained = []
+
+    for i, entry in enumerate(manifest):
         book_id = entry["book_id"]
         book_path = entry["file_path"]
+        char_count = entry.get("token_count", 0)  # Note: manifest calls it token_count but it's chars
         save_dir = Path(args.output_dir) / book_id
 
+        # Skip books that are too small to train meaningfully
+        if char_count < args.min_chars:
+            logger.info(f"Skipping {book_id}: too small ({char_count:,} chars < {args.min_chars:,})")
+            skipped.append(book_id)
+            continue
+
+        # Skip if already trained (checkpoint exists)
+        if (save_dir / "best" / "model.pt").exists():
+            logger.info(f"Skipping {book_id}: already trained (checkpoint exists)")
+            trained.append(book_id)
+            continue
+
         logger.info(f"\n{'='*60}")
-        logger.info(f"Pretraining: {entry['title']} ({book_id})")
+        logger.info(f"[{i+1}/{len(manifest)}] Pretraining: {entry['title']} ({book_id})")
         logger.info(f"{'='*60}")
 
         stats = pretrain_book(
@@ -103,9 +169,9 @@ def main():
 
         logger.info(f"Training stats for {book_id}: {stats}")
 
-        # Generate samples
+        # Generate samples using actual sentences from the book as prompts
         print(f"\n--- Sample generations from {book_id} ---")
-        prompts = ["The derivative", "A function is", "Let x be"]
+        prompts = _extract_prompts(book_path, n=3)
         try:
             samples = sample_from_model(
                 model_dir=str(save_dir / "best"),
@@ -121,7 +187,13 @@ def main():
         except Exception as e:
             logger.warning(f"Sample generation failed: {e}")
 
-    print(f"\nPretraining complete for {len(manifest)} books")
+        trained.append(book_id)
+
+    print(f"\n{'='*60}")
+    print(f"Pretraining complete!")
+    print(f"  Trained: {len(trained)} models")
+    print(f"  Skipped (too small): {len(skipped)} ({', '.join(skipped[:10])}{'...' if len(skipped) > 10 else ''})")
+    print(f"{'='*60}")
 
 
 if __name__ == "__main__":

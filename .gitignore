@@ -10,3 +10,5 @@ build/
 *.bin
 .claude/
 .DS_Store
+ANALYSIS_256_Embeddings_V1.docx
+ANALYSIS.md

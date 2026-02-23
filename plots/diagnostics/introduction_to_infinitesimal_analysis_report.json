@@ -1,0 +1,37 @@
+{
+  "book_id": "introduction_to_infinitesimal_analysis",
+  "attention_summary": {
+    "avg_entropy": 0.762625225370452,
+    "avg_ctx_attention": 0.972901084770759
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 28,
+    "dims_for_95pct": 124,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.6971212121212121,
+    "first_half_acc": 0.6991666666666667,
+    "second_half_acc": 0.6951839826839827
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.052201835284588764,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "introduction_to_infinitesimal_analysis",
+    "total_chars": 342845,
+    "total_tokens": 138432,
+    "unique_tokens": 3846,
+    "type_token_ratio": 0.027782593619972262,
+    "vocab_coverage": 0.469482421875,
+    "math_density": 0.29811764705882354,
+    "avg_sentence_length": 17.460480093676814,
+    "n_qa_pairs": 2000,
+    "avg_answer_words": 4.06,
+    "avg_context_words": 220.4345,
+    "avg_question_words": 15.037
+  }
+}
