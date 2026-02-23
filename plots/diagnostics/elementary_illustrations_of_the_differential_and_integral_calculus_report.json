@@ -1,0 +1,37 @@
+{
+  "book_id": "elementary_illustrations_of_the_differential_and_integral_calculus",
+  "attention_summary": {
+    "avg_entropy": 0.8174556122502222,
+    "avg_ctx_attention": 0.9688517252604166
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 107,
+    "dims_for_95pct": 175,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.3249528902470079,
+    "first_half_acc": 0.15940476190476188,
+    "second_half_acc": 0.4565079365079365
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05546308376592298,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "elementary_illustrations_of_the_differential_and_integral_calculus",
+    "total_chars": 245888,
+    "total_tokens": 77509,
+    "unique_tokens": 4121,
+    "type_token_ratio": 0.05316801919777058,
+    "vocab_coverage": 0.5030517578125,
+    "math_density": 0.20612882768617502,
+    "avg_sentence_length": 20.97640828117477,
+    "n_qa_pairs": 1222,
+    "avg_answer_words": 11.401800327332243,
+    "avg_context_words": 298.3510638297872,
+    "avg_question_words": 17.189034369885434
+  }
+}

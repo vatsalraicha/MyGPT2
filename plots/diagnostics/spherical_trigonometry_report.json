@@ -1,0 +1,37 @@
+{
+  "book_id": "spherical_trigonometry",
+  "attention_summary": {
+    "avg_entropy": 0.8095902026550753,
+    "avg_ctx_attention": 0.9745157063007355
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 106,
+    "dims_for_95pct": 174,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.38498710353973514,
+    "first_half_acc": 0.31596681096681095,
+    "second_half_acc": 0.4493253968253968
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.055115200003681614,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "spherical_trigonometry",
+    "total_chars": 213820,
+    "total_tokens": 73619,
+    "unique_tokens": 3015,
+    "type_token_ratio": 0.04095410152270473,
+    "vocab_coverage": 0.3680419921875,
+    "math_density": 0.22534225808708633,
+    "avg_sentence_length": 21.69918699186992,
+    "n_qa_pairs": 1094,
+    "avg_answer_words": 10.89945155393053,
+    "avg_context_words": 285.5868372943327,
+    "avg_question_words": 19.57038391224863
+  }
+}

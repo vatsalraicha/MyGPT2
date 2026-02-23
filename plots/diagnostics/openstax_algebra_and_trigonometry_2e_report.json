@@ -1,0 +1,37 @@
+{
+  "book_id": "openstax_algebra_and_trigonometry_2e",
+  "attention_summary": {
+    "avg_entropy": 0.7981837496651617,
+    "avg_ctx_attention": 0.9690907907982668
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 75,
+    "dims_for_95pct": 155,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.3945089258273842,
+    "first_half_acc": 0.3453571428571428,
+    "second_half_acc": 0.4409126984126985
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.054257355174508505,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "openstax_algebra_and_trigonometry_2e",
+    "total_chars": 1854300,
+    "total_tokens": 454057,
+    "unique_tokens": 6002,
+    "type_token_ratio": 0.013218604712624185,
+    "vocab_coverage": 0.732666015625,
+    "math_density": 0.016097653412500395,
+    "avg_sentence_length": 16.617843866171004,
+    "n_qa_pairs": 2000,
+    "avg_answer_words": 11.241,
+    "avg_context_words": 546.2145,
+    "avg_question_words": 5.599
+  }
+}

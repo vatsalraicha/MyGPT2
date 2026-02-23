@@ -1,0 +1,37 @@
+{
+  "book_id": "the_first_steps_in_algebra",
+  "attention_summary": {
+    "avg_entropy": 0.8038391510080793,
+    "avg_ctx_attention": 0.9731759428977966
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 75,
+    "dims_for_95pct": 156,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.3520575258075258,
+    "first_half_acc": 0.31464285714285717,
+    "second_half_acc": 0.393452380952381
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05493586513327443,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_first_steps_in_algebra",
+    "total_chars": 235706,
+    "total_tokens": 100924,
+    "unique_tokens": 2735,
+    "type_token_ratio": 0.02709959969878324,
+    "vocab_coverage": 0.3338623046875,
+    "math_density": 0.27006068085981694,
+    "avg_sentence_length": 11.5911587758305,
+    "n_qa_pairs": 1429,
+    "avg_answer_words": 5.636808957312806,
+    "avg_context_words": 272.9188243526942,
+    "avg_question_words": 16.675297410776768
+  }
+}

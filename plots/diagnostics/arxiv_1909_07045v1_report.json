@@ -1,0 +1,37 @@
+{
+  "book_id": "arxiv_1909_07045v1",
+  "attention_summary": {
+    "avg_entropy": 0.8370543649967194,
+    "avg_ctx_attention": 0.9593116926650206
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 172,
+    "dims_for_95pct": 212,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.7708403361344537,
+    "first_half_acc": 0.7726190476190475,
+    "second_half_acc": 0.7683333333333333
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05345444692953391,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "arxiv_1909_07045v1",
+    "total_chars": 8287,
+    "total_tokens": 3062,
+    "unique_tokens": 801,
+    "type_token_ratio": 0.26159372958850424,
+    "vocab_coverage": 0.0977783203125,
+    "math_density": 0.024752475247524754,
+    "avg_sentence_length": 13.904761904761905,
+    "n_qa_pairs": 68,
+    "avg_answer_words": 4.544117647058823,
+    "avg_context_words": 819.8823529411765,
+    "avg_question_words": 15.602941176470589
+  }
+}

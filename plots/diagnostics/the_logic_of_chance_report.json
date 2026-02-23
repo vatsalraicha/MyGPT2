@@ -1,0 +1,37 @@
+{
+  "book_id": "the_logic_of_chance",
+  "attention_summary": {
+    "avg_entropy": 0.8223204576096572,
+    "avg_ctx_attention": 0.9546720472474893
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 83,
+    "dims_for_95pct": 160,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.4584252297410193,
+    "first_half_acc": 0.37761904761904763,
+    "second_half_acc": 0.533968253968254
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05502574828804948,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_logic_of_chance",
+    "total_chars": 976475,
+    "total_tokens": 242653,
+    "unique_tokens": 5722,
+    "type_token_ratio": 0.02358099838040329,
+    "vocab_coverage": 0.698486328125,
+    "math_density": 0.010432120291508314,
+    "avg_sentence_length": 28.379746835443036,
+    "n_qa_pairs": 2000,
+    "avg_answer_words": 3.851,
+    "avg_context_words": 390.024,
+    "avg_question_words": 16.6735
+  }
+}

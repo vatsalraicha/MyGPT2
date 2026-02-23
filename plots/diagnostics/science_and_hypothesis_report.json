@@ -1,0 +1,37 @@
+{
+  "book_id": "science_and_hypothesis",
+  "attention_summary": {
+    "avg_entropy": 0.8223166628622766,
+    "avg_ctx_attention": 0.9481467256943384
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 73,
+    "dims_for_95pct": 154,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.4486059623211327,
+    "first_half_acc": 0.3875,
+    "second_half_acc": 0.5011111111111112
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05508974509424932,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "science_and_hypothesis",
+    "total_chars": 367815,
+    "total_tokens": 93089,
+    "unique_tokens": 4833,
+    "type_token_ratio": 0.05191805691327654,
+    "vocab_coverage": 0.5899658203125,
+    "math_density": 0.034689147139137615,
+    "avg_sentence_length": 24.590483619344774,
+    "n_qa_pairs": 2000,
+    "avg_answer_words": 2.6885,
+    "avg_context_words": 570.689,
+    "avg_question_words": 18.4395
+  }
+}

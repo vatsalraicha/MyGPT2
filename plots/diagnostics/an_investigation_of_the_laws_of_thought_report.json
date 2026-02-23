@@ -1,0 +1,37 @@
+{
+  "book_id": "an_investigation_of_the_laws_of_thought",
+  "attention_summary": {
+    "avg_entropy": 0.7653467401042496,
+    "avg_ctx_attention": 0.9241991167267164
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 56,
+    "dims_for_95pct": 144,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.41985641809171226,
+    "first_half_acc": 0.44547619047619047,
+    "second_half_acc": 0.4038347763347764
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05371690574147706,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "an_investigation_of_the_laws_of_thought",
+    "total_chars": 788957,
+    "total_tokens": 224821,
+    "unique_tokens": 5055,
+    "type_token_ratio": 0.022484554378816926,
+    "vocab_coverage": 0.6170654296875,
+    "math_density": 0.10558637370913779,
+    "avg_sentence_length": 24.987300435413644,
+    "n_qa_pairs": 2000,
+    "avg_answer_words": 5.872,
+    "avg_context_words": 367.404,
+    "avg_question_words": 11.5815
+  }
+}

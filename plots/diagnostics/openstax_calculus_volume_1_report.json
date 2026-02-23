@@ -1,0 +1,37 @@
+{
+  "book_id": "openstax_calculus_volume_1",
+  "attention_summary": {
+    "avg_entropy": 0.7905155507414446,
+    "avg_ctx_attention": 0.9307882611950239
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 58,
+    "dims_for_95pct": 145,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.4431078922797189,
+    "first_half_acc": 0.40131652661064426,
+    "second_half_acc": 0.48604872251931075
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.054153522154112364,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "openstax_calculus_volume_1",
+    "total_chars": 1112062,
+    "total_tokens": 387792,
+    "unique_tokens": 5728,
+    "type_token_ratio": 0.014770804967611503,
+    "vocab_coverage": 0.69921875,
+    "math_density": 0.03490976864213903,
+    "avg_sentence_length": 10.887593002211945,
+    "n_qa_pairs": 2000,
+    "avg_answer_words": 6.6125,
+    "avg_context_words": 509.5515,
+    "avg_question_words": 7.5895
+  }
+}

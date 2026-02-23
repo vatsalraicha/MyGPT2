@@ -10,9 +10,9 @@
     "n_embd": 256
   },
   "prediction_summary": {
-    "accuracy": 0.21642857142857141,
-    "first_half_acc": 0.11222222222222222,
-    "second_half_acc": 0.3208080808080808
+    "accuracy": 0.15265873015873016,
+    "first_half_acc": 0.10611111111111111,
+    "second_half_acc": 0.1970707070707071
   },
   "capacity_summary": {
     "total_params": 6953472,

@@ -1,0 +1,37 @@
+{
+  "book_id": "geometrical_solutions_derived_from_mechanics",
+  "attention_summary": {
+    "avg_entropy": 0.8211979247420306,
+    "avg_ctx_attention": 0.918550793081522
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 165,
+    "dims_for_95pct": 208,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.31284327932603795,
+    "first_half_acc": 0.24478354978354977,
+    "second_half_acc": 0.3703263403263403
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.055516582219645096,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "geometrical_solutions_derived_from_mechanics",
+    "total_chars": 72681,
+    "total_tokens": 20697,
+    "unique_tokens": 1621,
+    "type_token_ratio": 0.07832052954534474,
+    "vocab_coverage": 0.1978759765625,
+    "math_density": 0.40938370473537605,
+    "avg_sentence_length": 33.96165191740413,
+    "n_qa_pairs": 337,
+    "avg_answer_words": 23.543026706231455,
+    "avg_context_words": 524.4480712166172,
+    "avg_question_words": 11.01780415430267
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "book_id": "the_mathematical_analysis_of_logic",
+  "attention_summary": {
+    "avg_entropy": 0.8101240171364447,
+    "avg_ctx_attention": 0.9605808109045029
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 118,
+    "dims_for_95pct": 181,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.24075163398692814,
+    "first_half_acc": 0.2201190476190476,
+    "second_half_acc": 0.25523809523809526
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05519285904940726,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_mathematical_analysis_of_logic",
+    "total_chars": 137439,
+    "total_tokens": 41617,
+    "unique_tokens": 3036,
+    "type_token_ratio": 0.07295095754138933,
+    "vocab_coverage": 0.37060546875,
+    "math_density": 0.1613585469022145,
+    "avg_sentence_length": 25.502651113467657,
+    "n_qa_pairs": 966,
+    "avg_answer_words": 8.80952380952381,
+    "avg_context_words": 305.4472049689441,
+    "avg_question_words": 14.858178053830228
+  }
+}

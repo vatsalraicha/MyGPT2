@@ -1,0 +1,37 @@
+{
+  "book_id": "on_the_study_and_difficulties_of_mathematics",
+  "attention_summary": {
+    "avg_entropy": 0.7998497251911331,
+    "avg_ctx_attention": 0.975455779582262
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 75,
+    "dims_for_95pct": 156,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.32749250749250747,
+    "first_half_acc": 0.29523809523809524,
+    "second_half_acc": 0.3694047619047619
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05527497629960975,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "on_the_study_and_difficulties_of_mathematics",
+    "total_chars": 409502,
+    "total_tokens": 120780,
+    "unique_tokens": 4880,
+    "type_token_ratio": 0.04040404040404041,
+    "vocab_coverage": 0.595703125,
+    "math_density": 0.1390802282645183,
+    "avg_sentence_length": 25.468449931412895,
+    "n_qa_pairs": 2000,
+    "avg_answer_words": 2.806,
+    "avg_context_words": 393.2315,
+    "avg_question_words": 19.7585
+  }
+}

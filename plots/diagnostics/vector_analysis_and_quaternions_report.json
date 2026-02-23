@@ -1,0 +1,37 @@
+{
+  "book_id": "vector_analysis_and_quaternions",
+  "attention_summary": {
+    "avg_entropy": 0.8301885601284074,
+    "avg_ctx_attention": 0.9481461979448795
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 165,
+    "dims_for_95pct": 208,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.15031512605042016,
+    "first_half_acc": 0.04318181818181818,
+    "second_half_acc": 0.24949494949494952
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05657403955894264,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "vector_analysis_and_quaternions",
+    "total_chars": 74782,
+    "total_tokens": 26838,
+    "unique_tokens": 2370,
+    "type_token_ratio": 0.08830762351889113,
+    "vocab_coverage": 0.289306640625,
+    "math_density": 0.17487701327582722,
+    "avg_sentence_length": 21.967359050445104,
+    "n_qa_pairs": 469,
+    "avg_answer_words": 10.492537313432836,
+    "avg_context_words": 260.97014925373134,
+    "avg_question_words": 17.036247334754798
+  }
+}

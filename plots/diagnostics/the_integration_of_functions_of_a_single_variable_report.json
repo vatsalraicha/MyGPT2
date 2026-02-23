@@ -1,0 +1,37 @@
+{
+  "book_id": "the_integration_of_functions_of_a_single_variable",
+  "attention_summary": {
+    "avg_entropy": 0.8156112896547872,
+    "avg_ctx_attention": 0.9525292068719864
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 141,
+    "dims_for_95pct": 194,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.3176484845563793,
+    "first_half_acc": 0.31912698412698415,
+    "second_half_acc": 0.31845238095238093
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05531524395294897,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_integration_of_functions_of_a_single_variable",
+    "total_chars": 126467,
+    "total_tokens": 42457,
+    "unique_tokens": 2649,
+    "type_token_ratio": 0.06239253833290152,
+    "vocab_coverage": 0.3233642578125,
+    "math_density": 0.18242642388312513,
+    "avg_sentence_length": 23.226061204343534,
+    "n_qa_pairs": 820,
+    "avg_answer_words": 9.702439024390245,
+    "avg_context_words": 257.9939024390244,
+    "avg_question_words": 17.470731707317075
+  }
+}

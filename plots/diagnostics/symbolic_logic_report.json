@@ -1,0 +1,37 @@
+{
+  "book_id": "symbolic_logic",
+  "attention_summary": {
+    "avg_entropy": 0.8014635315614479,
+    "avg_ctx_attention": 0.9713119429846605
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 24,
+    "dims_for_95pct": 123,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.5105659699777346,
+    "first_half_acc": 0.41273809523809524,
+    "second_half_acc": 0.603015873015873
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05312137591119947,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "symbolic_logic",
+    "total_chars": 356317,
+    "total_tokens": 127095,
+    "unique_tokens": 3924,
+    "type_token_ratio": 0.030874542664935677,
+    "vocab_coverage": 0.47900390625,
+    "math_density": 0.010654513076679292,
+    "avg_sentence_length": 12.905753763662611,
+    "n_qa_pairs": 2000,
+    "avg_answer_words": 3.53,
+    "avg_context_words": 279.8355,
+    "avg_question_words": 13.784
+  }
+}

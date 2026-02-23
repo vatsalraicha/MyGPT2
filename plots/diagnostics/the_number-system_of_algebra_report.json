@@ -1,0 +1,37 @@
+{
+  "book_id": "the_number-system_of_algebra",
+  "attention_summary": {
+    "avg_entropy": 0.8077128152948658,
+    "avg_ctx_attention": 0.9346930931011835
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 102,
+    "dims_for_95pct": 172,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.2889307914307914,
+    "first_half_acc": 0.16666666666666669,
+    "second_half_acc": 0.39761904761904765
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05559927472203814,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_number-system_of_algebra",
+    "total_chars": 223312,
+    "total_tokens": 67225,
+    "unique_tokens": 4085,
+    "type_token_ratio": 0.0607660840461138,
+    "vocab_coverage": 0.4986572265625,
+    "math_density": 0.1295619498635919,
+    "avg_sentence_length": 21.20589841616603,
+    "n_qa_pairs": 1413,
+    "avg_answer_words": 7.352441613588111,
+    "avg_context_words": 273.8733191790517,
+    "avg_question_words": 16.581740976645435
+  }
+}

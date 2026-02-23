@@ -1,0 +1,37 @@
+{
+  "book_id": "arxiv_math_9812143v1",
+  "attention_summary": {
+    "avg_entropy": 0.8330097534504617,
+    "avg_ctx_attention": 0.9593906551599503
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 166,
+    "dims_for_95pct": 208,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.6115191834309481,
+    "first_half_acc": 0.4687987012987012,
+    "second_half_acc": 0.7504076479076479
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05353483842316471,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "arxiv_math_9812143v1",
+    "total_chars": 13266,
+    "total_tokens": 6218,
+    "unique_tokens": 675,
+    "type_token_ratio": 0.1085558057253136,
+    "vocab_coverage": 0.0823974609375,
+    "math_density": 0.3680767553423463,
+    "avg_sentence_length": 23.285714285714285,
+    "n_qa_pairs": 120,
+    "avg_answer_words": 12.083333333333334,
+    "avg_context_words": 180.64166666666668,
+    "avg_question_words": 13.85
+  }
+}

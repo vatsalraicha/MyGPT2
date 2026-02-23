@@ -1,0 +1,37 @@
+{
+  "book_id": "essays_on_the_theory_of_numbers",
+  "attention_summary": {
+    "avg_entropy": 0.8300348469212273,
+    "avg_ctx_attention": 0.9691087491810322
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 78,
+    "dims_for_95pct": 157,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.22464646464646462,
+    "first_half_acc": 0.23428571428571426,
+    "second_half_acc": 0.22694444444444445
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.05467714546056991,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "essays_on_the_theory_of_numbers",
+    "total_chars": 169523,
+    "total_tokens": 54008,
+    "unique_tokens": 3167,
+    "type_token_ratio": 0.05863946082061917,
+    "vocab_coverage": 0.3865966796875,
+    "math_density": 0.22959414848857532,
+    "avg_sentence_length": 22.037444933920703,
+    "n_qa_pairs": 1363,
+    "avg_answer_words": 8.512105649303008,
+    "avg_context_words": 288.57593543653707,
+    "avg_question_words": 12.752751283932502
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "book_id": "elements_of_plane_trigonometry",
+  "attention_summary": {
+    "avg_entropy": 0.8249058695074595,
+    "avg_ctx_attention": 0.9635240162412325
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 132,
+    "dims_for_95pct": 189,
+    "n_embd": 256
+  },
+  "prediction_summary": {
+    "accuracy": 0.22579704609116374,
+    "first_half_acc": 0.14452380952380953,
+    "second_half_acc": 0.2928571428571428
+  },
+  "capacity_summary": {
+    "total_params": 6953472,
+    "near_zero_fraction": 0.056511337070171565,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "elements_of_plane_trigonometry",
+    "total_chars": 175391,
+    "total_tokens": 54249,
+    "unique_tokens": 4183,
+    "type_token_ratio": 0.07710741211819573,
+    "vocab_coverage": 0.5106201171875,
+    "math_density": 0.08663457978526472,
+    "avg_sentence_length": 16.311048158640226,
+    "n_qa_pairs": 1131,
+    "avg_answer_words": 5.531388152077807,
+    "avg_context_words": 250.92396109637488,
+    "avg_question_words": 16.605658709106986
+  }
+}
