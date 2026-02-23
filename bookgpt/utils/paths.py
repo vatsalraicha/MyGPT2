@@ -43,26 +43,11 @@ def get_version(config: dict | None = None, cli_version: str | None = None) -> s
     return "v1"
 
 
-def _resolve(versioned: str, legacy: str) -> str:
-    """Return versioned path if it exists, otherwise fall back to legacy path.
-
-    For output dirs that don't exist yet (new version), returns the versioned path.
-    For existing data from before migration, falls back to the legacy path.
-    """
-    if Path(versioned).exists():
-        return versioned
-    if Path(legacy).exists():
-        return legacy
-    # Neither exists — return versioned (will be created by ensure_dirs)
-    return versioned
-
-
 def versioned_paths(config: dict, version: str | None = None) -> dict:
     """Return a dict of all versioned paths.
 
-    Uses fallback logic: if the versioned directory doesn't exist but the
-    legacy (unversioned) directory does, uses the legacy path. This allows
-    scripts to work seamlessly before and after migration.
+    Each version gets its own isolated directories. No fallback to other
+    versions — this prevents accidental overwrites.
 
     Args:
         config: Loaded config dict.
@@ -72,24 +57,23 @@ def versioned_paths(config: dict, version: str | None = None) -> dict:
         Dict with keys matching config["data"] but with versioned paths.
     """
     v = get_version(config, version)
-    data = config.get("data", {})
 
     return {
         # Shared (not versioned)
-        "books_dir": data.get("books_dir", "data/books/raw"),
-        "tokenized_dir": data.get("tokenized_dir", "data/books/tokenized"),
-        "manifest_path": data.get("manifest_path", "data/books/manifest.json"),
-        "tokenizers_dir": data.get("tokenizers_dir", "data/tokenizers"),
+        "books_dir": config.get("data", {}).get("books_dir", "data/books/raw"),
+        "tokenized_dir": config.get("data", {}).get("tokenized_dir", "data/books/tokenized"),
+        "manifest_path": config.get("data", {}).get("manifest_path", "data/books/manifest.json"),
+        "tokenizers_dir": config.get("data", {}).get("tokenizers_dir", "data/tokenizers"),
 
-        # Versioned outputs (with legacy fallback for pre-migration)
-        "pretrained_dir": _resolve(f"data/models/{v}/pretrained", data.get("pretrained_dir", "data/models/pretrained")),
-        "finetuned_dir": _resolve(f"data/models/{v}/finetuned", data.get("finetuned_dir", "data/models/finetuned")),
-        "qa_dir": _resolve(f"data/books/qa/{v}", data.get("qa_dir", "data/books/qa")),
-        "router_dir": _resolve(f"data/router/{v}", data.get("router_dir", "data/router")),
-        "logs_dir": _resolve(f"logs/{v}", data.get("logs_dir", "logs")),
-        "plots_dir": _resolve(f"plots/{v}", "plots"),
-        "diagnostics_dir": _resolve(f"plots/{v}/diagnostics", "plots/diagnostics"),
-        "dpo_dir": _resolve(f"data/dpo/{v}", "data/dpo"),
+        # Versioned outputs — always use versioned path, never fall back
+        "pretrained_dir": f"data/models/{v}/pretrained",
+        "finetuned_dir": f"data/models/{v}/finetuned",
+        "qa_dir": f"data/books/qa/{v}",
+        "router_dir": f"data/router/{v}",
+        "logs_dir": f"logs/{v}",
+        "plots_dir": f"plots/{v}",
+        "diagnostics_dir": f"plots/{v}/diagnostics",
+        "dpo_dir": f"data/dpo/{v}",
 
         # Metadata
         "version": v,

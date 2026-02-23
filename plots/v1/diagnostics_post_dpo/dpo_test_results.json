@@ -1,0 +1,22 @@
+{
+  "arxiv_2110_14321v1": {
+    "pre_dpo": [
+      {
+        "question": "What is a manifold?",
+        "output": "Q: What is a manifold?\nA: Let the form\n=1, _1, _2, , _n$ and $ _1, _2, , _n$ be linearly independent over the form 2.\nLogProb: -0.479",
+        "model_type": "pre-dpo"
+      },
+      {
+        "question": "Define a topological space.",
+        "output": "Q: Define a topological space.\nA: Let the form\n$ and properties of almost periodic functions\n\n the form\n1.\nLogProb: -0.948",
+        "model_type": "pre-dpo"
+      },
+      {
+        "question": "What is a differential form?",
+        "output": "Q: What is a differential form?\nA: Let the form 2.\nLogProb: -0.956",
+        "model_type": "pre-dpo"
+      }
+    ],
+    "post_dpo": []
+  }
+}

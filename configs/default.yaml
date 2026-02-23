@@ -82,6 +82,10 @@ qa_generate:
   chunk_overlap: 50
   min_qa_pairs: 500
   max_qa_pairs: 2000
+  max_cloze_fraction: 0.30  # cap cloze at 30% of max_qa_pairs
+  min_answer_words: 3       # reject answers with fewer words
+  max_math_density: 0.40    # skip chunks where >40% is math notation
+  clean_text: true           # apply text_cleaner before Q&A generation
 
 # Router
 router:
