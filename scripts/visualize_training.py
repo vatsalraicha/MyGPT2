@@ -280,6 +280,43 @@ def print_summary(logs: dict, book_sizes: dict, timing: dict, stage: str = "pret
         print(f"    {book_id}: val_loss={val_loss:.4f}, PPL={val_ppl:.1f}")
 
 
+def _extract_val_epochs(val_losses: list, n_train_epochs: int) -> tuple:
+    """Extract epoch-aligned x-axis and losses from val_losses.
+
+    Handles both new format (epoch key) and old format (step key, scaled to epochs).
+    """
+    if val_losses and "epoch" in val_losses[0]:
+        return [v["epoch"] for v in val_losses], [v["loss"] for v in val_losses]
+    # Fallback: step-based, scale to epoch range
+    v_steps = [v["step"] for v in val_losses]
+    max_step = v_steps[-1] if v_steps else 1
+    v_epochs = [s / max_step * n_train_epochs for s in v_steps]
+    return v_epochs, [v["loss"] for v in val_losses]
+
+
+def _find_best_epoch(log: dict) -> tuple | None:
+    """Find the epoch and loss of the best val checkpoint.
+
+    Returns (epoch, loss) or None if not enough data.
+    """
+    best_val = log.get("best_val_loss")
+    val_losses = log.get("val_losses", [])
+    if best_val is None or not val_losses:
+        return None
+
+    # Find the val entry closest to best_val_loss
+    best_entry = min(val_losses, key=lambda v: abs(v["loss"] - best_val))
+    n_train = len(log.get("train_losses", []))
+    # Get epoch — handle both formats
+    if "epoch" in best_entry:
+        return best_entry["epoch"], best_entry["loss"]
+    # Step-based fallback
+    v_steps = [v["step"] for v in val_losses]
+    max_step = v_steps[-1] if v_steps else 1
+    epoch = best_entry["step"] / max_step * n_train
+    return epoch, best_entry["loss"]
+
+
 def plot_loss_curves(logs: dict, output_dir: str = "plots", stage: str = "pretrain"):
     """Generate loss curve plots."""
     if not HAS_MATPLOTLIB:
@@ -307,15 +344,22 @@ def plot_loss_curves(logs: dict, output_dir: str = "plots", stage: str = "pretra
         t_losses = [e["loss"] for e in train_losses]
         ax.plot(epochs, t_losses, "b-", label="Train Loss", alpha=0.8)
 
-        # Val losses — use step-based x-axis scaled to epochs
+        # Val losses
         if val_losses:
-            v_steps = [v["step"] for v in val_losses]
-            v_losses = [v["loss"] for v in val_losses]
-            max_step = v_steps[-1] if v_steps else 1
-            max_epoch = epochs[-1] if epochs else 1
-            # Scale steps to epoch range for alignment
-            v_epochs = [s / max_step * max_epoch for s in v_steps]
+            v_epochs, v_losses = _extract_val_epochs(val_losses, len(train_losses))
             ax.plot(v_epochs, v_losses, "r--", label="Val Loss", alpha=0.8)
+
+            # Mark best epoch on both curves
+            best = _find_best_epoch(log)
+            if best:
+                best_epoch, best_loss = best
+                ax.plot(best_epoch, best_loss, "r*", markersize=14, zorder=5,
+                        label=f"Best val (epoch {best_epoch:.0f}, {best_loss:.4f})")
+                # Also mark on train curve
+                train_at_best = next((e["loss"] for e in train_losses if e["epoch"] == best_epoch), None)
+                if train_at_best is not None:
+                    ax.plot(best_epoch, train_at_best, "b*", markersize=14, zorder=5,
+                            label=f"Train @ best (epoch {best_epoch:.0f}, {train_at_best:.4f})")
 
         ax.set_xlabel("Epoch")
         ax.set_ylabel("Loss")
@@ -327,15 +371,15 @@ def plot_loss_curves(logs: dict, output_dir: str = "plots", stage: str = "pretra
         fig.savefig(output_dir / f"{prefix}{book_id}_loss.png", dpi=100)
         plt.close(fig)
 
-    # Summary dashboard
+    # Summary dashboard — 2 columns, 4 rows
     if len(logs) > 1:
-        fig, axes = plt.subplots(2, 2, figsize=(34, 20))
+        fig, axes = plt.subplots(4, 2, figsize=(32, 40))
 
-        # Plot 1: Best val loss distribution
+        # Row 0, Col 0: Best val loss distribution
         ax = axes[0, 0]
         val_losses = [(k, v.get("best_val_loss", float("inf"))) for k, v in logs.items()]
         val_losses.sort(key=lambda x: x[1])
-        names = [v[0][:60] for v in val_losses[:60]]  # Top 60
+        names = [v[0][:60] for v in val_losses[:60]]
         losses = [v[1] for v in val_losses[:60]]
         ax.barh(range(len(names)), losses, color="steelblue", alpha=0.8)
         ax.set_yticks(range(len(names)))
@@ -344,7 +388,7 @@ def plot_loss_curves(logs: dict, output_dir: str = "plots", stage: str = "pretra
         ax.set_title(f"{stage.title()} — Top {len(names)} Models by Val Loss")
         ax.invert_yaxis()
 
-        # Plot 2: PPL distribution
+        # Row 0, Col 1: PPL distribution (histogram)
         ax = axes[0, 1]
         ppls = [math.exp(min(v[1], 15)) for v in val_losses]
         ax.hist(ppls, bins=20, color="coral", alpha=0.8, edgecolor="black")
@@ -352,38 +396,190 @@ def plot_loss_curves(logs: dict, output_dir: str = "plots", stage: str = "pretra
         ax.set_ylabel("Count")
         ax.set_title(f"{stage.title()} — PPL Distribution")
 
-        # Plot 3: Epochs trained
+        # Row 1, Col 0: All train loss curves overlaid
         ax = axes[1, 0]
+        for book_id, log in list(logs.items())[:60]:
+            train_losses = log.get("train_losses", [])
+            if train_losses:
+                epochs = [e["epoch"] for e in train_losses]
+                t_losses = [e["loss"] for e in train_losses]
+                line, = ax.plot(epochs, t_losses, alpha=0.5, linewidth=0.8, label=book_id[:15])
+                best = _find_best_epoch(log)
+                if best:
+                    # Find train loss at the best val epoch
+                    best_ep = best[0]
+                    train_at_best = next((e["loss"] for e in train_losses if e["epoch"] == best_ep), None)
+                    if train_at_best is not None:
+                        ax.plot(best_ep, train_at_best, "o", color=line.get_color(), markersize=5,
+                                markeredgecolor="black", markeredgewidth=0.5, zorder=5)
+        ax.set_xlabel("Epoch")
+        ax.set_ylabel("Train Loss")
+        ax.set_title(f"{stage.title()} — Train Loss Curves (● = best val epoch)")
+        ax.grid(True, alpha=0.3)
+        handles, labels = ax.get_legend_handles_labels()
+        if len(handles) <= 20:
+            ax.legend(fontsize=6, loc="upper right", ncol=2)
+        else:
+            ax.legend(fontsize=5, loc="upper right", ncol=3, framealpha=0.7)
+
+        # Row 1, Col 1: All val loss curves overlaid (epoch-aligned)
+        ax = axes[1, 1]
+        for book_id, log in list(logs.items())[:60]:
+            train_losses = log.get("train_losses", [])
+            val_losses_list = log.get("val_losses", [])
+            if val_losses_list and train_losses:
+                v_epochs, v_losses = _extract_val_epochs(val_losses_list, len(train_losses))
+                line, = ax.plot(v_epochs, v_losses, alpha=0.6, linewidth=1.0, label=book_id[:15])
+                best = _find_best_epoch(log)
+                if best:
+                    ax.plot(best[0], best[1], "o", color=line.get_color(), markersize=5,
+                            markeredgecolor="black", markeredgewidth=0.5, zorder=5)
+        ax.set_xlabel("Epoch")
+        ax.set_ylabel("Val Loss")
+        ax.set_title(f"{stage.title()} — Val Loss Curves (● = best epoch)")
+        ax.grid(True, alpha=0.3)
+        handles, labels = ax.get_legend_handles_labels()
+        if len(handles) <= 20:
+            ax.legend(fontsize=6, loc="upper right", ncol=2)
+        else:
+            ax.legend(fontsize=5, loc="upper right", ncol=3, framealpha=0.7)
+
+        # Row 2, Col 0: Val PPL curves by epoch (NEW)
+        ax = axes[2, 0]
+        for book_id, log in list(logs.items())[:60]:
+            train_losses = log.get("train_losses", [])
+            val_losses_list = log.get("val_losses", [])
+            if val_losses_list and train_losses:
+                v_epochs, v_losses = _extract_val_epochs(val_losses_list, len(train_losses))
+                v_ppls = [math.exp(min(l, 15)) for l in v_losses]
+                line, = ax.plot(v_epochs, v_ppls, alpha=0.6, linewidth=1.0, label=book_id[:15])
+                best = _find_best_epoch(log)
+                if best:
+                    best_ppl = math.exp(min(best[1], 15))
+                    ax.plot(best[0], best_ppl, "o", color=line.get_color(), markersize=5,
+                            markeredgecolor="black", markeredgewidth=0.5, zorder=5)
+        ax.set_xlabel("Epoch")
+        ax.set_ylabel("Val Perplexity")
+        ax.set_title(f"{stage.title()} — Val PPL Curves (● = best epoch)")
+        ax.grid(True, alpha=0.3)
+        handles, labels = ax.get_legend_handles_labels()
+        if len(handles) <= 20:
+            ax.legend(fontsize=6, loc="upper right", ncol=2)
+        else:
+            ax.legend(fontsize=5, loc="upper right", ncol=3, framealpha=0.7)
+
+        # Row 2, Col 1: Epochs trained distribution
+        ax = axes[2, 1]
         epoch_counts = [len(v.get("train_losses", [])) for v in logs.values()]
         max_ep = max(epoch_counts) if epoch_counts else 200
-        bin_size = max(5, (max_ep // 15) + 1)  # ~15 bins, minimum width 5
+        bin_size = max(5, (max_ep // 15) + 1)
         bins = range(0, max_ep + bin_size + 1, bin_size)
         ax.hist(epoch_counts, bins=bins, color="mediumpurple", alpha=0.8, edgecolor="black")
         ax.set_xlabel("Epochs Trained")
         ax.set_ylabel("Count")
         ax.set_title(f"{stage.title()} — Training Duration Distribution")
 
-        # Plot 4: All loss curves overlaid
-        ax = axes[1, 1]
-        for book_id, log in list(logs.items())[:60]:  # Top 60
-            train_losses = log.get("train_losses", [])
-            if train_losses:
-                epochs = [e["epoch"] for e in train_losses]
-                t_losses = [e["loss"] for e in train_losses]
-                ax.plot(epochs, t_losses, alpha=0.5, linewidth=0.8, label=book_id[:15])
-        ax.set_xlabel("Epoch")
-        ax.set_ylabel("Train Loss")
-        ax.set_title(f"{stage.title()} — Loss Curves (first 60 models)")
-        ax.grid(True, alpha=0.3)
+        # Row 3, Col 0: Val loss slope at end
+        ax = axes[3, 0]
+        slope_data = []
+        for book_id, log in logs.items():
+            val_losses_list = log.get("val_losses", [])
+            if len(val_losses_list) >= 2:
+                last = val_losses_list[-1]["loss"]
+                prev = val_losses_list[-2]["loss"]
+                slope = last - prev
+                best_val = log.get("best_val_loss", float("inf"))
+                slope_data.append((book_id, slope, best_val))
+        if slope_data:
+            slope_data.sort(key=lambda x: x[1])
+            names_s = [s[0][:30] for s in slope_data[:40]]
+            slopes = [s[1] for s in slope_data[:40]]
+            colors = ["#d32f2f" if s < -0.05 else "#f57c00" if s < 0 else "#4caf50" for s in slopes]
+            ax.barh(range(len(names_s)), slopes, color=colors, alpha=0.8)
+            ax.set_yticks(range(len(names_s)))
+            ax.set_yticklabels(names_s, fontsize=7)
+            ax.set_xlabel("Val Loss Slope (last 2 checkpoints)")
+            ax.set_title(f"{stage.title()} — Val Loss Slope at End (red = still improving)")
+            ax.axvline(x=0, color="black", linewidth=0.5, linestyle="--")
+            ax.invert_yaxis()
+
+        # Row 3, Col 1: Best val PPL bar chart (sorted)
+        ax = axes[3, 1]
+        ppl_data = [(k, math.exp(min(v.get("best_val_loss", 20), 15))) for k, v in logs.items()]
+        ppl_data.sort(key=lambda x: x[1])
+        names_p = [p[0][:30] for p in ppl_data[:60]]
+        ppls_p = [p[1] for p in ppl_data[:60]]
+        ax.barh(range(len(names_p)), ppls_p, color="darkorange", alpha=0.8)
+        ax.set_yticks(range(len(names_p)))
+        ax.set_yticklabels(names_p, fontsize=7)
+        ax.set_xlabel("Best Val Perplexity")
+        ax.set_title(f"{stage.title()} — Models Ranked by Best Val PPL")
+        ax.invert_yaxis()
 
         fig.tight_layout()
         fig.savefig(output_dir / f"{prefix}training_dashboard.png", dpi=120)
         plt.close(fig)
 
+        # Standalone val loss plot — all models on one chart
+        fig, ax = plt.subplots(1, 1, figsize=(20, 14))
+        for book_id, log in list(logs.items())[:60]:
+            train_losses = log.get("train_losses", [])
+            val_losses_list = log.get("val_losses", [])
+            if val_losses_list and train_losses:
+                v_epochs, v_losses = _extract_val_epochs(val_losses_list, len(train_losses))
+                line, = ax.plot(v_epochs, v_losses, alpha=0.6, linewidth=1.2, marker="o",
+                        markersize=3, label=book_id[:20])
+                best = _find_best_epoch(log)
+                if best:
+                    ax.plot(best[0], best[1], "*", color=line.get_color(), markersize=12,
+                            markeredgecolor="black", markeredgewidth=0.5, zorder=5)
+        ax.set_xlabel("Epoch", fontsize=12)
+        ax.set_ylabel("Val Loss", fontsize=12)
+        ax.set_title(f"{stage.title()} — Val Loss Curves (★ = best epoch)", fontsize=14)
+        ax.grid(True, alpha=0.3)
+        handles, labels = ax.get_legend_handles_labels()
+        if len(handles) <= 20:
+            ax.legend(fontsize=7, loc="upper right", ncol=2)
+        else:
+            ax.legend(fontsize=6, loc="upper right", ncol=3, framealpha=0.7)
+        fig.tight_layout()
+        fig.savefig(output_dir / f"{prefix}val_loss_curves.png", dpi=120)
+        plt.close(fig)
+
+        # Standalone val PPL plot — all models on one chart
+        fig, ax = plt.subplots(1, 1, figsize=(20, 14))
+        for book_id, log in list(logs.items())[:60]:
+            train_losses = log.get("train_losses", [])
+            val_losses_list = log.get("val_losses", [])
+            if val_losses_list and train_losses:
+                v_epochs, v_losses = _extract_val_epochs(val_losses_list, len(train_losses))
+                v_ppls = [math.exp(min(l, 15)) for l in v_losses]
+                line, = ax.plot(v_epochs, v_ppls, alpha=0.6, linewidth=1.2, marker="o",
+                        markersize=3, label=book_id[:20])
+                best = _find_best_epoch(log)
+                if best:
+                    best_ppl = math.exp(min(best[1], 15))
+                    ax.plot(best[0], best_ppl, "*", color=line.get_color(), markersize=12,
+                            markeredgecolor="black", markeredgewidth=0.5, zorder=5)
+        ax.set_xlabel("Epoch", fontsize=12)
+        ax.set_ylabel("Val Perplexity", fontsize=12)
+        ax.set_title(f"{stage.title()} — Val PPL Curves (★ = best epoch)", fontsize=14)
+        ax.grid(True, alpha=0.3)
+        handles, labels = ax.get_legend_handles_labels()
+        if len(handles) <= 20:
+            ax.legend(fontsize=7, loc="upper right", ncol=2)
+        else:
+            ax.legend(fontsize=6, loc="upper right", ncol=3, framealpha=0.7)
+        fig.tight_layout()
+        fig.savefig(output_dir / f"{prefix}val_ppl_curves.png", dpi=120)
+        plt.close(fig)
+
     print(f"\nPlots saved to {output_dir}/")
     print(f"  - {len(logs)} individual loss curves ({prefix}*_loss.png)")
     if len(logs) > 1:
-        print(f"  - {prefix}training_dashboard.png (summary)")
+        print(f"  - {prefix}training_dashboard.png (8-panel summary: 4×2 layout)")
+        print(f"  - {prefix}val_loss_curves.png (all models val loss overlaid)")
+        print(f"  - {prefix}val_ppl_curves.png (all models val PPL overlaid)")
 
 
 def main():
@@ -403,6 +599,8 @@ def main():
                         help="Override log file path")
     parser.add_argument("--no-plots", action="store_true",
                         help="Only print text summary, skip plot generation")
+    parser.add_argument("--skip-arxiv", action="store_true",
+                        help="Skip arxiv papers (book_id starts with 'arxiv_')")
     add_version_arg(parser)
     args = parser.parse_args()
 
@@ -417,14 +615,20 @@ def main():
     book_sizes = load_book_sizes(args.manifest)
     qa_stats = load_qa_stats(paths["qa_dir"])
 
+    def filter_arxiv(d: dict) -> dict:
+        """Remove arxiv entries if --skip-arxiv is set."""
+        if not args.skip_arxiv:
+            return d
+        return {k: v for k, v in d.items() if not k.startswith("arxiv_")}
+
     stages = ["pretrain", "finetune", "dpo"] if args.stage == "all" else [args.stage]
 
     for stage in stages:
         if stage == "pretrain":
             models_dir = args.models_dir or paths["pretrained_dir"]
             log_path = args.log or f"{paths['logs_dir']}/pretrain.log"
-            logs = load_training_logs(models_dir)
-            timing = parse_training_log(log_path, marker="Pretraining")
+            logs = filter_arxiv(load_training_logs(models_dir))
+            timing = filter_arxiv(parse_training_log(log_path, marker="Pretraining"))
             print_summary(logs, book_sizes, timing, stage="pretrain")
             if not args.no_plots and logs:
                 plot_loss_curves(logs, output_dir, stage="pretrain")
@@ -432,9 +636,9 @@ def main():
         elif stage == "finetune":
             models_dir = args.models_dir or paths["finetuned_dir"]
             log_path = args.log or f"{paths['logs_dir']}/finetune.log"
-            logs = load_training_logs(models_dir)
-            timing = parse_finetune_log(log_path)
-            pretrain_logs = load_training_logs(paths["pretrained_dir"])
+            logs = filter_arxiv(load_training_logs(models_dir))
+            timing = filter_arxiv(parse_finetune_log(log_path))
+            pretrain_logs = filter_arxiv(load_training_logs(paths["pretrained_dir"]))
             print_summary(logs, book_sizes, timing, stage="finetune",
                           qa_stats=qa_stats, pretrain_logs=pretrain_logs)
             if not args.no_plots and logs:
@@ -442,7 +646,7 @@ def main():
 
         elif stage == "dpo":
             models_dir = args.models_dir or f"{paths['dpo_dir']}/models"
-            logs = load_training_logs(models_dir)
+            logs = filter_arxiv(load_training_logs(models_dir))
             timing = {}  # DPO timing from training_log.json directly
             # Extract timing from the logs themselves
             for book_id, log in logs.items():
@@ -450,7 +654,7 @@ def main():
                 if train_losses:
                     # Approximate time from epoch count (not precise but useful)
                     timing[book_id] = {"time_sec": 0, "steps": 0}
-            finetune_logs = load_training_logs(paths["finetuned_dir"])
+            finetune_logs = filter_arxiv(load_training_logs(paths["finetuned_dir"]))
             print_summary(logs, book_sizes, timing, stage="dpo",
                           pretrain_logs=finetune_logs)
             if not args.no_plots and logs:

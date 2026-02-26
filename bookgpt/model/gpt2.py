@@ -1,6 +1,7 @@
-"""GPT-2 model architecture implemented from scratch in PyTorch.
+"""GPT-2 model architecture with learned absolute positional embeddings.
 
-Small-scale GPT-2 for per-book training on Apple Silicon (MPS).
+Per-book GPT-2 for training on Apple Silicon (MPS).
+v2: 6 layers, 12 heads, 768 embedding dim, 49M params.
 """
 
 import json
@@ -18,16 +19,16 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class GPT2Config:
-    """Configuration for a small GPT-2 model."""
+    """Configuration for GPT-2 model."""
 
     vocab_size: int = 8192
     n_layer: int = 6
-    n_head: int = 8
-    n_embd: int = 256
+    n_head: int = 12
+    n_embd: int = 768
     context_length: int = 512
     dropout: float = 0.1
     bias: bool = False
-    tie_weights: bool = True  # tie input/output embeddings
+    tie_weights: bool = True
 
     @property
     def head_dim(self) -> int:
@@ -69,7 +70,7 @@ class GPT2Config:
 
 
 class CausalSelfAttention(nn.Module):
-    """Multi-head causal (masked) self-attention."""
+    """Multi-head causal self-attention."""
 
     def __init__(self, config: GPT2Config):
         super().__init__()
@@ -87,16 +88,15 @@ class CausalSelfAttention(nn.Module):
         self.n_embd = config.n_embd
         self.head_dim = config.head_dim
 
-        # Causal mask: prevents attending to future tokens
+        # Causal mask
         self.register_buffer(
             "causal_mask",
-            torch.tril(torch.ones(config.context_length, config.context_length)).view(
-                1, 1, config.context_length, config.context_length
-            ),
+            torch.tril(torch.ones(config.context_length, config.context_length))
+            .view(1, 1, config.context_length, config.context_length),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        B, T, C = x.size()  # batch, seq_len, embedding_dim
+        B, T, C = x.size()
 
         # Compute Q, K, V
         qkv = self.c_attn(x)  # (B, T, 3*C)
@@ -156,7 +156,7 @@ class TransformerBlock(nn.Module):
 
 
 class GPT2(nn.Module):
-    """Small GPT-2 language model."""
+    """GPT-2 language model with learned absolute positional embeddings."""
 
     def __init__(self, config: GPT2Config):
         super().__init__()
@@ -188,6 +188,7 @@ class GPT2(nn.Module):
 
         n_params = sum(p.numel() for p in self.parameters())
         logger.info(f"GPT-2 model initialized: {n_params:,} parameters")
+        logger.info(f"  Learned absolute positional embeddings (ctx={config.context_length})")
 
     def _init_weights(self, module: nn.Module):
         """Initialize weights following GPT-2 conventions."""
@@ -223,8 +224,8 @@ class GPT2(nn.Module):
             f"Sequence length {T} exceeds context length {self.config.context_length}"
         )
 
-        # Token + positional embeddings
-        pos = torch.arange(0, T, dtype=torch.long, device=input_ids.device)
+        # Token + position embeddings
+        pos = torch.arange(0, T, dtype=torch.long, device=input_ids.device)  # (T,)
         tok_emb = self.transformer["wte"](input_ids)  # (B, T, C)
         pos_emb = self.transformer["wpe"](pos)  # (T, C)
         x = self.transformer["drop"](tok_emb + pos_emb)
@@ -241,20 +242,17 @@ class GPT2(nn.Module):
         loss = None
         if targets is not None:
             # Shift logits and targets for next-token prediction
-            # logits[:, :-1] predicts targets[:, 1:]
             shift_logits = logits[:, :-1, :].contiguous()
             shift_targets = targets[:, 1:].contiguous()
 
             if loss_mask is not None:
                 shift_mask = loss_mask[:, 1:].contiguous()
-                # Compute per-token loss
                 loss_per_token = F.cross_entropy(
                     shift_logits.view(-1, shift_logits.size(-1)),
                     shift_targets.view(-1),
                     reduction="none",
                 )
                 loss_per_token = loss_per_token.view(B, T - 1)
-                # Mask and average
                 loss = (loss_per_token * shift_mask).sum() / shift_mask.sum().clamp(min=1)
             else:
                 loss = F.cross_entropy(
@@ -337,6 +335,9 @@ class GPT2(nn.Module):
         load_dir = Path(load_dir)
 
         config_dict = json.loads((load_dir / "config.json").read_text())
+        # Handle loading old configs that may have rope_theta/window_size keys
+        config_dict.pop("rope_theta", None)
+        config_dict.pop("window_size", None)
         config = GPT2Config(**config_dict)
 
         model = cls(config)

@@ -1,0 +1,37 @@
+{
+  "book_id": "calculus_made_easy",
+  "attention_summary": {
+    "avg_entropy": 0.7968134758285097,
+    "avg_ctx_attention": 0.9641170394089487
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 566,
+    "dims_for_95pct": 658,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.9231655409097865,
+    "first_half_acc": 0.8943094629156011,
+    "second_half_acc": 0.9418128276951807
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07129720738450004,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "calculus_made_easy",
+    "total_chars": 261740,
+    "total_tokens": 96218,
+    "unique_tokens": 4015,
+    "type_token_ratio": 0.04172815897233366,
+    "vocab_coverage": 0.4901123046875,
+    "math_density": 0.19751070397291645,
+    "avg_sentence_length": 16.910478128179044,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

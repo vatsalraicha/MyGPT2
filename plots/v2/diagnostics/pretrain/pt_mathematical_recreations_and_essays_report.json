@@ -1,0 +1,37 @@
+{
+  "book_id": "mathematical_recreations_and_essays",
+  "attention_summary": {
+    "avg_entropy": 0.8090543379234987,
+    "avg_ctx_attention": 0.969088915321562
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 629,
+    "dims_for_95pct": 693,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.008333333333333333,
+    "first_half_acc": 0.016666666666666666,
+    "second_half_acc": 0.0
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07332614793859786,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "mathematical_recreations_and_essays",
+    "total_chars": 835629,
+    "total_tokens": 244911,
+    "unique_tokens": 6263,
+    "type_token_ratio": 0.025572554928116744,
+    "vocab_coverage": 0.7645263671875,
+    "math_density": 0.10495082959657039,
+    "avg_sentence_length": 22.444950526150464,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

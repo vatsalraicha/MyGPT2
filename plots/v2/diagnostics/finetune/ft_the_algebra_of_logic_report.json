@@ -1,0 +1,37 @@
+{
+  "book_id": "the_algebra_of_logic",
+  "attention_summary": {
+    "avg_entropy": 0.8173956035753372,
+    "avg_ctx_attention": 0.9519797480768628
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 588,
+    "dims_for_95pct": 670,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.8843297800906497,
+    "first_half_acc": 0.8037474120082816,
+    "second_half_acc": 0.9581521739130435
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07223821100672644,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_algebra_of_logic",
+    "total_chars": 165238,
+    "total_tokens": 51005,
+    "unique_tokens": 3116,
+    "type_token_ratio": 0.06109204979903931,
+    "vocab_coverage": 0.38037109375,
+    "math_density": 0.07760789626475711,
+    "avg_sentence_length": 25.66914805624483,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

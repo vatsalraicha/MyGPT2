@@ -1,0 +1,37 @@
+{
+  "book_id": "elementary_principles_of_statistical_mechanics",
+  "attention_summary": {
+    "avg_entropy": 0.809852439455789,
+    "avg_ctx_attention": 0.9719932294554181
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 629,
+    "dims_for_95pct": 693,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.0,
+    "first_half_acc": 0.0,
+    "second_half_acc": 0.0
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.0736090937015171,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "elementary_principles_of_statistical_mechanics",
+    "total_chars": 350319,
+    "total_tokens": 102578,
+    "unique_tokens": 3535,
+    "type_token_ratio": 0.03446158045584823,
+    "vocab_coverage": 0.4315185546875,
+    "math_density": 0.1285270453278101,
+    "avg_sentence_length": 29.890209125475284,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "book_id": "amusements_in_mathematics",
+  "attention_summary": {
+    "avg_entropy": 0.8057190516960246,
+    "avg_ctx_attention": 0.9584591322475009
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 600,
+    "dims_for_95pct": 677,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.4800868584459915,
+    "first_half_acc": 0.3056959706959707,
+    "second_half_acc": 0.6227350427350427
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07219367343605201,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "amusements_in_mathematics",
+    "total_chars": 908238,
+    "total_tokens": 270280,
+    "unique_tokens": 5655,
+    "type_token_ratio": 0.02092274678111588,
+    "vocab_coverage": 0.6903076171875,
+    "math_density": 0.00886137769121688,
+    "avg_sentence_length": 18.791671306090635,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

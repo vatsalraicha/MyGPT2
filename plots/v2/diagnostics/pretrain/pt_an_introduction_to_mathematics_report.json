@@ -1,0 +1,37 @@
+{
+  "book_id": "an_introduction_to_mathematics",
+  "attention_summary": {
+    "avg_entropy": 0.7934132598852996,
+    "avg_ctx_attention": 0.9733987036678526
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 625,
+    "dims_for_95pct": 691,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.010238095238095237,
+    "first_half_acc": 0.007142857142857143,
+    "second_half_acc": 0.0125
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07326212772285218,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "an_introduction_to_mathematics",
+    "total_chars": 310852,
+    "total_tokens": 88701,
+    "unique_tokens": 5115,
+    "type_token_ratio": 0.05766564074813136,
+    "vocab_coverage": 0.6243896484375,
+    "math_density": 0.10710154121730045,
+    "avg_sentence_length": 21.64880227365002,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

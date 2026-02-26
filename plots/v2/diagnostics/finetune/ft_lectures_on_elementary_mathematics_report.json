@@ -1,0 +1,37 @@
+{
+  "book_id": "lectures_on_elementary_mathematics",
+  "attention_summary": {
+    "avg_entropy": 0.8185120828557848,
+    "avg_ctx_attention": 0.9431452602148056
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 581,
+    "dims_for_95pct": 666,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.7424943657770982,
+    "first_half_acc": 0.7390643778879074,
+    "second_half_acc": 0.7461205096073517
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07198084892595716,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "lectures_on_elementary_mathematics",
+    "total_chars": 241092,
+    "total_tokens": 69607,
+    "unique_tokens": 4301,
+    "type_token_ratio": 0.061789762523884094,
+    "vocab_coverage": 0.5250244140625,
+    "math_density": 0.11704244031830238,
+    "avg_sentence_length": 24.207656612529004,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

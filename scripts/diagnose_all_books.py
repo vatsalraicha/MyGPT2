@@ -2,25 +2,48 @@
 """Run full diagnostics (with plots) on every finetuned book model.
 
 Usage:
-    python scripts/diagnose_all_books.py
-    python scripts/diagnose_all_books.py --no-plots   # reports only, skip plot generation
+    python scripts/diagnose_all_books.py                          # current version
+    python scripts/diagnose_all_books.py --version v2             # specific version
+    python scripts/diagnose_all_books.py --skip-arxiv             # skip arxiv papers
+    python scripts/diagnose_all_books.py --no-plots               # reports only
 """
 
+import argparse
 import subprocess
 import sys
 import time
 from pathlib import Path
 
+import yaml
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from bookgpt.utils.paths import versioned_paths, add_version_arg
+
 
 def main():
-    no_plots = "--no-plots" in sys.argv
+    parser = argparse.ArgumentParser(description="Run diagnostics on all finetuned models")
+    parser.add_argument("--no-plots", action="store_true", help="Skip plot generation")
+    parser.add_argument("--skip-arxiv", action="store_true", help="Skip arxiv papers")
+    parser.add_argument("--config", type=str, default="configs/default.yaml", help="Config file")
+    add_version_arg(parser)
+    args = parser.parse_args()
 
-    models_dir = Path("data/models/finetuned")
+    with open(args.config) as f:
+        config = yaml.safe_load(f)
+    paths = versioned_paths(config, args.version)
+
+    models_dir = Path(paths["finetuned_dir"])
     book_dirs = sorted([d for d in models_dir.iterdir() if (d / "best").exists()])
 
+    if args.skip_arxiv:
+        before = len(book_dirs)
+        book_dirs = [d for d in book_dirs if not d.name.startswith("arxiv_")]
+        print(f"Skipping arxiv: {before - len(book_dirs)} removed")
+
     total = len(book_dirs)
-    print(f"Found {total} finetuned models to diagnose")
-    print(f"Plots: {'DISABLED' if no_plots else 'ENABLED'}")
+    print(f"Found {total} finetuned models to diagnose (version: {paths['version']})")
+    print(f"Plots: {'DISABLED' if args.no_plots else 'ENABLED'}")
     print(f"=" * 60)
 
     completed = 0
@@ -35,8 +58,9 @@ def main():
         cmd = [
             sys.executable, "scripts/diagnose_model.py",
             "--book-id", book_id,
+            "--version", paths["version"],
         ]
-        if no_plots:
+        if args.no_plots:
             cmd.append("--no-plots")
 
         try:
@@ -70,12 +94,13 @@ def main():
     total_time = time.time() - start_all
     print(f"\n{'=' * 60}")
     print(f"DIAGNOSTICS COMPLETE")
+    print(f"  Version: {paths['version']}")
     print(f"  Total time: {total_time/60:.1f} minutes")
     print(f"  Completed: {completed}/{total}")
     print(f"  Failed: {len(failed)}")
     if failed:
         print(f"  Failed books: {', '.join(failed)}")
-    print(f"  Plots saved to: plots/diagnostics/")
+    print(f"  Plots saved to: {paths['diagnostics_dir']}/")
     print(f"{'=' * 60}")
 
 

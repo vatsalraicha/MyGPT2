@@ -1,0 +1,37 @@
+{
+  "book_id": "some_famous_problems_of_the_theory_of_numbers",
+  "attention_summary": {
+    "avg_entropy": 0.8194917968794461,
+    "avg_ctx_attention": 0.9632596911655532
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 624,
+    "dims_for_95pct": 691,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.8248245780485369,
+    "first_half_acc": 0.803233082706767,
+    "second_half_acc": 0.8457602920874245
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07368259086152501,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "some_famous_problems_of_the_theory_of_numbers",
+    "total_chars": 55484,
+    "total_tokens": 16345,
+    "unique_tokens": 2413,
+    "type_token_ratio": 0.14762924441725297,
+    "vocab_coverage": 0.2945556640625,
+    "math_density": 0.11316725978647686,
+    "avg_sentence_length": 26.106100795755967,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

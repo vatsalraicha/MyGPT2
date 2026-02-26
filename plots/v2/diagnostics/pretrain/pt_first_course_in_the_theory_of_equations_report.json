@@ -1,0 +1,37 @@
+{
+  "book_id": "first_course_in_the_theory_of_equations",
+  "attention_summary": {
+    "avg_entropy": 0.8165678736220372,
+    "avg_ctx_attention": 0.9689274438553386
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 627,
+    "dims_for_95pct": 692,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.011145510835913312,
+    "first_half_acc": 0.02361111111111111,
+    "second_half_acc": 0.0
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07337904393007008,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "first_course_in_the_theory_of_equations",
+    "total_chars": 326972,
+    "total_tokens": 128541,
+    "unique_tokens": 3661,
+    "type_token_ratio": 0.028481184991559112,
+    "vocab_coverage": 0.4468994140625,
+    "math_density": 0.23987715930902112,
+    "avg_sentence_length": 19.147409172126267,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

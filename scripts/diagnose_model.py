@@ -952,7 +952,10 @@ def print_report(book_id, attention_results, embedding_results, prediction_resul
 def main():
     parser = argparse.ArgumentParser(description="Model Diagnostics")
     parser.add_argument("--book-id", type=str, help="Book to diagnose")
-    parser.add_argument("--all", action="store_true", help="Run on all finetuned models (summary only)")
+    parser.add_argument("--all", action="store_true", help="Run on all models (summary only)")
+    parser.add_argument("--stage", type=str, default="finetune",
+                        choices=["pretrain", "finetune"],
+                        help="Which model stage to diagnose (default: finetune)")
     parser.add_argument("--no-plots", action="store_true", help="Skip plot generation")
     parser.add_argument("--n-samples", type=int, default=10, help="Number of Q&A samples to analyze")
     parser.add_argument("--models-dir", type=str, default=None)
@@ -976,13 +979,16 @@ def main():
     paths = versioned_paths(config, args.version)
 
     if args.models_dir is None:
-        args.models_dir = paths["finetuned_dir"]
+        if args.stage == "pretrain":
+            args.models_dir = paths["pretrained_dir"]
+        else:
+            args.models_dir = paths["finetuned_dir"]
     if args.pretrained_dir is None:
         args.pretrained_dir = paths["pretrained_dir"]
     if args.qa_dir is None:
         args.qa_dir = paths["qa_dir"]
     if args.output_dir is None:
-        args.output_dir = paths["diagnostics_dir"]
+        args.output_dir = str(Path(paths["diagnostics_dir"]) / args.stage)
 
     # Load tokenizer
     tokenizer = load_tokenizer(args.tokenizer_dir)
@@ -1009,7 +1015,7 @@ def run_single_book(args, tokenizer, device):
     model_path = Path(args.models_dir) / book_id / "best"
 
     if not model_path.exists():
-        print(f"Error: No finetuned model at {model_path}")
+        print(f"Error: No {args.stage} model at {model_path}")
         sys.exit(1)
 
     print(f"Loading model: {model_path}")
@@ -1134,15 +1140,15 @@ def run_single_book(args, tokenizer, device):
 
 
 def run_all_summary(args, tokenizer, device):
-    """Run quick summary diagnostics on all finetuned models."""
+    """Run quick summary diagnostics on all models."""
     models_dir = Path(args.models_dir)
     book_dirs = sorted([d for d in models_dir.iterdir() if (d / "best").exists()])
 
     if not book_dirs:
-        print("No finetuned models found")
+        print(f"No {args.stage} models found")
         return
 
-    print(f"Found {len(book_dirs)} finetuned models\n")
+    print(f"Found {len(book_dirs)} {args.stage} models\n")
     print(f"{'Book ID':<45} {'Params':<10} {'NearZero%':<10} {'Sat.Layers':<12} {'Emb90%':<8} {'Acc':<8} {'ErrComp'}")
     print(f"{'─'*105}")
 

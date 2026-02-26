@@ -62,6 +62,7 @@ def main():
     parser.add_argument("--book-id", type=str, default=None, help="Process specific book only")
     parser.add_argument("--min-chars", type=int, default=5000, help="Minimum chars to process")
     parser.add_argument("--skip-qa-gen", action="store_true", help="Skip Q&A generation (use existing)")
+    parser.add_argument("--skip-arxiv", action="store_true", help="Skip arxiv papers (book_id starts with 'arxiv_')")
     parser.add_argument("--force-cpu", action="store_true", help="Force CPU training")
     args = parser.parse_args()
 
@@ -110,6 +111,11 @@ def main():
         if not manifest:
             logger.error(f"Book ID '{args.book_id}' not found in manifest")
             return
+
+    if args.skip_arxiv:
+        before = len(manifest)
+        manifest = [e for e in manifest if not e["book_id"].startswith("arxiv_")]
+        logger.info(f"Skipping arxiv papers: {before - len(manifest)} removed, {len(manifest)} books remaining")
 
     qa_config = config.get("qa_generate", {})
     ft_config = config.get("finetune", {})

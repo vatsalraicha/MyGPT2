@@ -1,0 +1,37 @@
+{
+  "book_id": "utility_of_quaternions_in_physics",
+  "attention_summary": {
+    "avg_entropy": 0.8141558400480997,
+    "avg_ctx_attention": 0.9698244656125704
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 587,
+    "dims_for_95pct": 670,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.908974358974359,
+    "first_half_acc": 0.8066666666666666,
+    "second_half_acc": 1.0
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07211533611996168,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "utility_of_quaternions_in_physics",
+    "total_chars": 214017,
+    "total_tokens": 67976,
+    "unique_tokens": 3697,
+    "type_token_ratio": 0.05438684241496999,
+    "vocab_coverage": 0.4512939453125,
+    "math_density": 0.17532993472771452,
+    "avg_sentence_length": 23.445500279485746,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

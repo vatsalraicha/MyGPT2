@@ -123,6 +123,7 @@ class Trainer:
         """
         batch_size = self.config.get("batch_size", 32)
         max_epochs = self.config.get("max_epochs", 50)
+        min_epochs = self.config.get("min_epochs", 0)  # Don't allow early stopping before this epoch
         grad_clip = self.config.get("grad_clip", 1.0)
         patience = self.config.get("patience", 5)
         min_delta = self.config.get("min_delta", 0.0)  # Minimum improvement to count as progress
@@ -214,12 +215,11 @@ class Trainer:
                         f"Time: {elapsed:.0f}s"
                     )
 
-                # Periodic eval
+                # Periodic eval (logged but not stored — epoch-level val is in val_losses)
                 if self.global_step % eval_interval == 0 and len(val_loader) > 0:
                     val_loss = self.evaluate(val_loader)
                     val_ppl = math.exp(min(val_loss, 20))
                     self.log.info(f"  Val Loss: {val_loss:.4f} | Val PPL: {val_ppl:.2f}")
-                    self.val_losses.append({"step": self.global_step, "loss": val_loss})
 
                 # Periodic save
                 if self.global_step % save_interval == 0:
@@ -232,6 +232,7 @@ class Trainer:
             val_loss = self.evaluate(val_loader) if len(val_loader) > 0 else avg_epoch_loss
             val_ppl = math.exp(min(val_loss, 20))
             train_ppl = math.exp(min(avg_epoch_loss, 20))
+            self.val_losses.append({"epoch": epoch + 1, "loss": val_loss})
 
             self.log.info(
                 f"Epoch {epoch+1}/{max_epochs} complete | "
@@ -253,8 +254,8 @@ class Trainer:
                     f"  No improvement (val={val_loss:.4f}, best={self.best_val_loss:.4f}, "
                     f"gap={gap:+.4f}, patience={self.patience_counter}/{patience if patience > 0 else 'disabled'})"
                 )
-                # Early stopping only if patience > 0 (0 = disabled, run all epochs)
-                if patience > 0 and self.patience_counter >= patience:
+                # Early stopping only if patience > 0 (0 = disabled) and past min_epochs
+                if patience > 0 and self.patience_counter >= patience and (epoch + 1) >= min_epochs:
                     self.log.info(f"Early stopping after {epoch+1} epochs (patience={patience}, min_delta={min_delta})")
                     break
 
@@ -330,8 +331,8 @@ def pretrain_book(
     config = GPT2Config(
         vocab_size=vocab_size,
         n_layer=mc.get("n_layer", 6),
-        n_head=mc.get("n_head", 8),
-        n_embd=mc.get("n_embd", 256),
+        n_head=mc.get("n_head", 12),
+        n_embd=mc.get("n_embd", 768),
         context_length=mc.get("context_length", 512),
         dropout=mc.get("dropout", 0.1),
         bias=mc.get("bias", False),

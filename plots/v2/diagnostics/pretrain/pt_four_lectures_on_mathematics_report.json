@@ -1,0 +1,37 @@
+{
+  "book_id": "four_lectures_on_mathematics",
+  "attention_summary": {
+    "avg_entropy": 0.8227916301861178,
+    "avg_ctx_attention": 0.9581684942046801
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 633,
+    "dims_for_95pct": 696,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.026580086580086582,
+    "first_half_acc": 0.013703703703703704,
+    "second_half_acc": 0.039090909090909086
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07387953233842501,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "four_lectures_on_mathematics",
+    "total_chars": 103411,
+    "total_tokens": 26719,
+    "unique_tokens": 2983,
+    "type_token_ratio": 0.11164339982783787,
+    "vocab_coverage": 0.3641357421875,
+    "math_density": 0.07982827638220108,
+    "avg_sentence_length": 21.810606060606062,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

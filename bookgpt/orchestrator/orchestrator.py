@@ -44,9 +44,14 @@ class Orchestrator:
         self.models_dir = Path(models_dir)
         self.use_finetuned = use_finetuned
 
-        # Load router
-        logger.info("Loading router...")
-        self.router = BookRouter.load(router_dir)
+        # Load router (optional — not needed when a specific book is forced)
+        router_path = Path(router_dir)
+        if router_path.exists() and (router_path / "router.pkl").exists():
+            logger.info("Loading router...")
+            self.router = BookRouter.load(router_dir)
+        else:
+            logger.info("Router not found — routing disabled (use --book-id to select a book)")
+            self.router = None
 
         # Load shared tokenizer (same for all models)
         logger.info("Loading shared tokenizer...")

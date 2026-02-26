@@ -1,0 +1,37 @@
+{
+  "book_id": "solid_geometry_with_problems_and_applications",
+  "attention_summary": {
+    "avg_entropy": 0.7878660571508794,
+    "avg_ctx_attention": 0.9757640990946028
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 561,
+    "dims_for_95pct": 655,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.8890728715728715,
+    "first_half_acc": 0.809047619047619,
+    "second_half_acc": 0.9523809523809523
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07138209314705485,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "solid_geometry_with_problems_and_applications",
+    "total_chars": 307738,
+    "total_tokens": 98341,
+    "unique_tokens": 3466,
+    "type_token_ratio": 0.035244709734495276,
+    "vocab_coverage": 0.423095703125,
+    "math_density": 0.17162815107041388,
+    "avg_sentence_length": 15.06322473771397,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

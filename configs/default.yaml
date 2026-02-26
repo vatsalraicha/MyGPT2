@@ -4,7 +4,7 @@
 # All outputs (models, logs, plots, Q&A data) go under versioned subdirectories.
 # Use --version flag on scripts to override, or change here.
 # Shared data (raw books, tokenizer, manifest) is NOT versioned.
-version: "v1"
+version: "v2"
 
 # Data paths (base paths — version is prepended to output dirs automatically)
 data:
@@ -41,30 +41,31 @@ tokenizer:
     - "<|answer|>"
     - "<|context|>"
 
-# Model architecture
+# Model architecture (v2: 49M params, absolute positional embeddings)
 model:
   n_layer: 6
-  n_head: 8
-  n_embd: 256
+  n_head: 12
+  n_embd: 768
   context_length: 512
   dropout: 0.1
   bias: false  # no bias in linear layers (following GPT-2/3 convention)
 
-# Pretraining
+# Pretraining (v2: adjusted for 49M param model — lower LR, patience enabled)
 pretrain:
-  batch_size: 32
-  learning_rate: 3.0e-4
+  batch_size: 16
+  learning_rate: 2.0e-4
   weight_decay: 0.1
   betas: [0.9, 0.95]
-  max_epochs: 200
+  max_epochs: 100
   warmup_fraction: 0.05
   grad_clip: 1.0
   eval_interval: 500
   save_interval: 1000
-  patience: 0  # 0 = disabled (run all max_epochs). Set >0 to enable early stopping.
-  min_delta: 0.01  # minimum val loss improvement to reset patience counter (only used if patience > 0)
+  patience: 30  # stop after 30 epochs without val improvement
+  min_epochs: 50  # never stop before this epoch, regardless of patience
+  min_delta: 0.001  # minimum val loss improvement to reset patience counter
   train_split: 0.9
-  gradient_accumulation_steps: 4
+  gradient_accumulation_steps: 8
 
 # Fine-tuning
 finetune:

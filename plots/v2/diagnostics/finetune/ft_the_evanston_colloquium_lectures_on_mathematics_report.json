@@ -1,0 +1,37 @@
+{
+  "book_id": "the_evanston_colloquium_lectures_on_mathematics",
+  "attention_summary": {
+    "avg_entropy": 0.8212869743331912,
+    "avg_ctx_attention": 0.9687004196974967
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 590,
+    "dims_for_95pct": 671,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.8556277056277057,
+    "first_half_acc": 0.7957142857142857,
+    "second_half_acc": 0.9004761904761904
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07235793369100053,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_evanston_colloquium_lectures_on_mathematics",
+    "total_chars": 184275,
+    "total_tokens": 49001,
+    "unique_tokens": 4042,
+    "type_token_ratio": 0.08248811248750025,
+    "vocab_coverage": 0.493408203125,
+    "math_density": 0.06959062385869384,
+    "avg_sentence_length": 22.54586129753915,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

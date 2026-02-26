@@ -1,0 +1,37 @@
+{
+  "book_id": "the_first_six_books_of_the_elements_of_euclid",
+  "attention_summary": {
+    "avg_entropy": 0.8243844360179167,
+    "avg_ctx_attention": 0.977750700381067
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 596,
+    "dims_for_95pct": 675,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.6055772005772007,
+    "first_half_acc": 0.45833333333333337,
+    "second_half_acc": 0.7300000000000001
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07244780196716959,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_first_six_books_of_the_elements_of_euclid",
+    "total_chars": 500054,
+    "total_tokens": 150100,
+    "unique_tokens": 3820,
+    "type_token_ratio": 0.025449700199866754,
+    "vocab_coverage": 0.46630859375,
+    "math_density": 0.2633262869222419,
+    "avg_sentence_length": 16.251429625530346,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

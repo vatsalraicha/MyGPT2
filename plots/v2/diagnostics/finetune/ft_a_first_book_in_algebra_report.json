@@ -1,0 +1,37 @@
+{
+  "book_id": "a_first_book_in_algebra",
+  "attention_summary": {
+    "avg_entropy": 0.8114706621807231,
+    "avg_ctx_attention": 0.9770691759056516
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 585,
+    "dims_for_95pct": 668,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.8040384039440642,
+    "first_half_acc": 0.7834297281665703,
+    "second_half_acc": 0.823968253968254
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07209050489905143,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "a_first_book_in_algebra",
+    "total_chars": 179877,
+    "total_tokens": 83643,
+    "unique_tokens": 2342,
+    "type_token_ratio": 0.02799995217770764,
+    "vocab_coverage": 0.285888671875,
+    "math_density": 0.26189953937266947,
+    "avg_sentence_length": 11.196021815848573,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

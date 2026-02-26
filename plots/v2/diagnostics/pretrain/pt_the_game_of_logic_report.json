@@ -1,0 +1,37 @@
+{
+  "book_id": "the_game_of_logic",
+  "attention_summary": {
+    "avg_entropy": 0.8099856106339646,
+    "avg_ctx_attention": 0.9500000236762894
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 636,
+    "dims_for_95pct": 697,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.029977226908878007,
+    "first_half_acc": 0.03954757660640014,
+    "second_half_acc": 0.02069456171623354
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.0744027572782932,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_game_of_logic",
+    "total_chars": 90042,
+    "total_tokens": 30607,
+    "unique_tokens": 2305,
+    "type_token_ratio": 0.07530956970627634,
+    "vocab_coverage": 0.2813720703125,
+    "math_density": 0.002461221452693034,
+    "avg_sentence_length": 15.997156398104265,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

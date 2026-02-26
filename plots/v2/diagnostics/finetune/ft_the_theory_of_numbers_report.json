@@ -1,0 +1,37 @@
+{
+  "book_id": "the_theory_of_numbers",
+  "attention_summary": {
+    "avg_entropy": 0.8273218391822392,
+    "avg_ctx_attention": 0.9633757952186797
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 595,
+    "dims_for_95pct": 674,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.7837201991601366,
+    "first_half_acc": 0.7084040959040958,
+    "second_half_acc": 0.8515056022408963
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07240849095159259,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_theory_of_numbers",
+    "total_chars": 125756,
+    "total_tokens": 41626,
+    "unique_tokens": 2274,
+    "type_token_ratio": 0.05462931821457743,
+    "vocab_coverage": 0.277587890625,
+    "math_density": 0.19992883687831106,
+    "avg_sentence_length": 21.227464195450715,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

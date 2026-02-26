@@ -1,0 +1,37 @@
+{
+  "book_id": "an_essay_on_the_foundations_of_geometry",
+  "attention_summary": {
+    "avg_entropy": 0.7927757625361317,
+    "avg_ctx_attention": 0.9380880511469312
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 630,
+    "dims_for_95pct": 694,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.005263157894736842,
+    "first_half_acc": 0.0,
+    "second_half_acc": 0.01
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07334180726709982,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "an_essay_on_the_foundations_of_geometry",
+    "total_chars": 483107,
+    "total_tokens": 120036,
+    "unique_tokens": 4942,
+    "type_token_ratio": 0.041170982038721715,
+    "vocab_coverage": 0.603271484375,
+    "math_density": 0.01753447001554655,
+    "avg_sentence_length": 24.36625,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

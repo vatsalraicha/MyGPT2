@@ -1,0 +1,37 @@
+{
+  "book_id": "the_elements_of_non-euclidean_geometry",
+  "attention_summary": {
+    "avg_entropy": 0.8187310116449403,
+    "avg_ctx_attention": 0.9523457056946225
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 630,
+    "dims_for_95pct": 694,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.03555555555555555,
+    "first_half_acc": 0.025396825396825397,
+    "second_half_acc": 0.04583333333333333
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.0736963995421131,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "the_elements_of_non-euclidean_geometry",
+    "total_chars": 552041,
+    "total_tokens": 173748,
+    "unique_tokens": 4926,
+    "type_token_ratio": 0.028351405483804132,
+    "vocab_coverage": 0.601318359375,
+    "math_density": 0.14148792818715109,
+    "avg_sentence_length": 19.595757575757577,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}

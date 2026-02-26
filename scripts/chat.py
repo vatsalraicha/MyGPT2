@@ -85,14 +85,15 @@ def main():
     device = get_device(force_cpu=args.force_cpu)
 
     # Verify required files exist
-    for path, name in [
-        (args.manifest, "Book manifest"),
-        (args.router_dir, "Router artifacts"),
-    ]:
-        if not Path(path).exists():
-            print(f"Error: {name} not found at {path}")
-            print("Run the pipeline first: crawl_books → train_tokenizer → pretrain → finetune → train_router")
-            sys.exit(1)
+    if not Path(args.manifest).exists():
+        print(f"Error: Book manifest not found at {args.manifest}")
+        print("Run the pipeline first: crawl_books → train_tokenizer → pretrain → finetune → train_router")
+        sys.exit(1)
+
+    if not Path(args.router_dir).exists() and not args.book_id:
+        print(f"Error: Router not found at {args.router_dir}")
+        print("Either run 'python scripts/train_router.py' first, or use --book-id to select a book directly.")
+        sys.exit(1)
 
     # Initialize orchestrator
     print(f"Loading models (version: {paths['version']})...")
@@ -117,8 +118,10 @@ def main():
     print(f"Models: {'fine-tuned' if not args.no_finetuned else 'pretrained'}")
     if forced_book:
         print(f"Forced book: {forced_book}")
-    else:
+    elif orchestrator.router:
         print(f"Books indexed: {len(orchestrator.router.book_ids)}")
+    else:
+        print(f"Router: not loaded (use --book-id or /book to select)")
     print()
 
     while True:
@@ -145,7 +148,8 @@ def main():
 
             elif cmd_name == "/books":
                 print("\nAvailable books:")
-                for book_id in orchestrator.router.book_ids:
+                book_ids = orchestrator.router.book_ids if orchestrator.router else sorted(orchestrator.manifest.keys())
+                for book_id in book_ids:
                     meta = orchestrator.manifest.get(book_id, {})
                     title = meta.get("title", book_id)
                     source = meta.get("source", "unknown")
@@ -196,7 +200,7 @@ def main():
                 temperature=temperature,
                 verbose=verbose,
             )
-        else:
+        elif orchestrator.router:
             result = orchestrator.query(
                 question=user_input,
                 top_k=top_k,
@@ -204,6 +208,9 @@ def main():
                 temperature=temperature,
                 verbose=verbose,
             )
+        else:
+            print("No router loaded. Use /book <book_id> to select a book first.")
+            continue
 
         if not verbose:
             # In non-verbose mode, just show the final answer

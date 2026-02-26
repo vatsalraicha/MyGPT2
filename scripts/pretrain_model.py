@@ -87,6 +87,7 @@ def main():
     add_version_arg(parser)
     parser.add_argument("--book-id", type=str, default=None, help="Train specific book only")
     parser.add_argument("--min-chars", type=int, default=5000, help="Minimum chars to train (skip smaller)")
+    parser.add_argument("--skip-arxiv", action="store_true", help="Skip arxiv papers (book_id starts with 'arxiv_')")
     parser.add_argument("--force-cpu", action="store_true", help="Force CPU training")
     args = parser.parse_args()
 
@@ -132,6 +133,13 @@ def main():
             logger.error(f"Book ID '{args.book_id}' not found in manifest")
             return
 
+    if args.skip_arxiv:
+        before = len(manifest)
+        manifest = [e for e in manifest if not e["book_id"].startswith("arxiv_")]
+        logger.info(f"Skipping arxiv papers: {before - len(manifest)} removed, {len(manifest)} books remaining")
+
+    # Use raw text for pretraining (cleaned text hurts PPL — see Phase 8 experiments)
+    # Cleaned text is used for Q&A generation only
     skipped = []
     trained = []
 

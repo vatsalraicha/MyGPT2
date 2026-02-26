@@ -1,0 +1,37 @@
+{
+  "book_id": "an_elementary_course_in_synthetic_projective_geometry",
+  "attention_summary": {
+    "avg_entropy": 0.8071217950284431,
+    "avg_ctx_attention": 0.9493416622281075
+  },
+  "embedding_summary": {
+    "dims_for_90pct": 633,
+    "dims_for_95pct": 696,
+    "n_embd": 768
+  },
+  "prediction_summary": {
+    "accuracy": 0.01,
+    "first_half_acc": 0.02,
+    "second_half_acc": 0.0
+  },
+  "capacity_summary": {
+    "total_params": 49171968,
+    "near_zero_fraction": 0.07401930709789772,
+    "saturated_layers": 0,
+    "total_weight_layers": 26
+  },
+  "complexity": {
+    "book_id": "an_elementary_course_in_synthetic_projective_geometry",
+    "total_chars": 194672,
+    "total_tokens": 53414,
+    "unique_tokens": 3444,
+    "type_token_ratio": 0.0644774778148051,
+    "vocab_coverage": 0.42041015625,
+    "math_density": 0.0381717145267813,
+    "avg_sentence_length": 20.828068043742405,
+    "n_qa_pairs": 0,
+    "avg_answer_words": 0.0,
+    "avg_context_words": 0.0,
+    "avg_question_words": 0.0
+  }
+}
